@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+httpx
+pydantic
+python-dotenv
+openai
+pytest
+pytest-asyncio
+pytest-cov
+httpx
+requests
+coverage

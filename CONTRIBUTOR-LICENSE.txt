@@ -1,0 +1,10 @@
+Contributor License Agreement (CLA v1.0)
+
+By submitting code, documentation, or other content ("Contribution") to this repository, you agree to the following terms:
+
+1. You grant Midhun (the "Owner") a perpetual, worldwide, royalty-free license to use, modify, distribute, and sublicense your Contribution as part of this proprietary project.
+2. You affirm that your Contribution is original and that you have the legal right to submit it.
+3. You understand that this project is not open source, and your Contribution may be used in commercial products without further attribution or compensation.
+4. You retain copyright to your Contribution, but grant the Owner full rights to incorporate it into the project.
+
+If you do not agree to these terms, do not submit a Contribution.

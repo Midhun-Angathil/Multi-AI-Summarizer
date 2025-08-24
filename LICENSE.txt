@@ -1,0 +1,22 @@
+Copyright © 2025 Midhun
+
+All rights reserved.
+
+This software and its associated files are proprietary and confidential. Unauthorized use, reproduction, modification, distribution, sublicensing, or resale is strictly prohibited.
+
+Permission to use this software must be granted explicitly in writing by the author. If permission is granted, the following conditions apply:
+
+1. **Attribution**: You must clearly credit "Midhun" as the original author in all public or private uses.
+2. **Non-Commercial Use**: You may not use this software for commercial purposes unless a separate commercial license is obtained.
+3. **No Derivatives**: You may not modify, adapt, or create derivative works based on this software without written consent.
+4. **No Redistribution**: You may not redistribute this software or any part of it to third parties.
+5. **License Tiers**: Commercial use may be granted under tiered licensing agreements, which include:
+   - **Personal License**: For individual, non-commercial use
+   - **Startup License**: For small-scale commercial use with limited deployment
+   - **Enterprise License**: For large-scale commercial use, SaaS integration, or resale rights
+
+This software is provided "as is" without warranty of any kind, express or implied. The author retains full intellectual property ownership and reserves the right to revoke access or licensing at any time.
+
+Violation of these terms may result in legal action.
+
+To request permission or inquire about licensing terms, contact: midhun.angathil@gmail.com

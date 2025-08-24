@@ -1,0 +1,11 @@
+venv_backend/
+venv_frontend/
+venv/
+.env
+__pycache__/
+node_modules/
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+steps_local.txt
