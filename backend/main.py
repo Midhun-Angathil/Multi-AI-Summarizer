@@ -20,209 +20,237 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root():
-    return {"message": "multi-ai-summarizer backend running!"}
-
-# ---------------- Request Model ----------------
 class QueryRequest(BaseModel):
     query: str
     providers: list[str]
+    history: list[dict] | None = None
 
-# ---------------- Cache ----------------
 CACHE = {}
-
 def get_cached(query: str, provider: str):
     return CACHE.get(f"{provider}_{query}")
-
 def set_cache(query: str, provider: str, response: str):
     CACHE[f"{provider}_{query}"] = response
 
-# ---------------- Simulated response ----------------
 def simulate_response(provider: str, query: str) -> str:
     return f"[{provider} simulated response for query: '{query}'] ⚠️ Provider not accessible in free mode."
 
-# ---------------- Gemini ----------------
-async def list_gemini_models(api_key: str):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.get(url)
-        r.raise_for_status()
-        return r.json().get("models", [])
-
-def select_text_generation_model(models: list) -> str | None:
-    for model in models:
-        if "generateText" in model.get("supportedGenerationMethods", []):
-            return model["name"]
-    return None
-
-async def call_gemini(query: str) -> str:
+# ---------------- Providers ----------------
+async def call_gemini(query: str, history: list[dict] = None) -> str:
     cached = get_cached(query, "gemini")
     if cached:
         return cached
-
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        response = simulate_response("Gemini", query)
+        response = "⚠️ Gemini API key missing. Set GEMINI_API_KEY in .env"
         set_cache(query, "gemini", response)
         return response
-
     try:
-        models = await list_gemini_models(api_key)
-        model_name = select_text_generation_model(models)
+        # If Gemini supports history, concatenate history into the prompt
+        prompt = ""
+        if history:
+            for m in history:
+                role = "AI" if m.get("role") == "ai" else "User"
+                prompt += f"{role}: {m.get('content','')}\n"
+        prompt += f"User: {query}\nAI:"
+        url_models = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.get(url_models)
+            r.raise_for_status()
+            models = r.json().get("models", [])
+        model_name = None
+        for m in models:
+            if "generateText" in m.get("supportedGenerationMethods", []):
+                model_name = m["name"]
+                break
         if not model_name:
-            response = "[Gemini: no accessible text-generation model] ⚠️ Free tier does not allow text-generation yet."
+            response = "⚠️ Gemini no accessible text-generation model."
             set_cache(query, "gemini", response)
             return response
-
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateText?key={api_key}"
-        payload = {"prompt": {"text": query}, "temperature": 0.7, "candidate_count": 1}
-
+        payload = {"prompt": {"text": prompt}, "temperature": 0.4, "candidate_count": 1}
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(url, json=payload)
             r.raise_for_status()
             data = r.json()
             candidates = data.get("candidates")
             if candidates:
-                response = candidates[0].get("content", "[Gemini returned empty content]")
+                response = candidates[0].get("content", "[Gemini returned empty]")
             else:
                 response = "[Gemini returned no candidates]"
     except Exception as e:
-        response = f"[Gemini call failed: {str(e)}] ⚠️ Free tier or missing access"
-
+        response = f"⚠️ Gemini call failed: {str(e)}"
     set_cache(query, "gemini", response)
     return response
 
-# ---------------- Cohere ----------------
-async def call_cohere(query: str) -> str:
+async def call_cohere(query: str, history: list[dict] = None) -> str:
     cached = get_cached(query, "cohere")
     if cached:
         return cached
-
     api_key = os.getenv("COHERE_API_KEY")
     if not api_key:
-        response = simulate_response("Cohere", query)
+        response = "⚠️ Cohere API key missing. Set COHERE_API_KEY in .env"
         set_cache(query, "cohere", response)
         return response
-
+    # If Cohere supports history, concatenate history into the prompt
+    prompt = ""
+    if history:
+        for m in history:
+            role = "AI" if m.get("role") == "ai" else "User"
+            prompt += f"{role}: {m.get('content','')}\n"
+    prompt += f"User: {query}\nAI:"
     url = "https://api.cohere.ai/v1/generate"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    payload = {"model": "command", "prompt": query, "max_tokens": 200}  # reduced max_tokens to save cost
-
+    payload = {"model": "command", "prompt": prompt, "max_tokens": 300, "temperature": 0.4}
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(url, headers=headers, json=payload)
             r.raise_for_status()
             data = r.json()
-            generations = data.get("generations")
-            if generations:
-                response = generations[0].get("text", "[Cohere returned empty text]").strip()
+            gens = data.get("generations")
+            if gens:
+                response = gens[0].get("text", "[Cohere returned empty]").strip()
             else:
                 response = "[Cohere returned no generations]"
     except Exception as e:
-        response = f"[Cohere call failed: {str(e)}] ⚠️ Free tier or missing access"
-
+        response = f"⚠️ Cohere call failed: {str(e)}"
     set_cache(query, "cohere", response)
     return response
 
-# ---------------- OpenAI ----------------
-async def call_openai(query: str) -> str:
+async def call_openai(query: str, history: list[dict]) -> str:
     cached = get_cached(query, "openai")
     if cached:
         return cached
-
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        response = simulate_response("OpenAI", query)
+        response = "⚠️ OpenAI API key missing. Set OPENAI_API_KEY in .env"
         set_cache(query, "openai", response)
         return response
-
     try:
         openai.api_key = api_key
+        # Prompt engineered for concise high-quality summary
+        messages = [{"role":"system","content":"Answer concisely and clearly, covering all critical points, avoid verbosity. Use short sentences."}]
+        for m in (history or []):
+            role = "assistant" if m.get("role")=="ai" else "user"
+            messages.append({"role": role, "content": m.get("content","")})
+        messages.append({"role":"user","content":query})
         response_obj = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": query}],
-            temperature=0.7,
-            max_tokens=200  # reduced max_tokens
+            messages=messages,
+            temperature=0.4,
+            max_tokens=500
         )
         response = response_obj.choices[0].message.content.strip()
     except Exception as e:
-        response = f"[OpenAI call failed: {str(e)}] ⚠️ Free tier or missing access"
-
+        response = f"⚠️ OpenAI call failed: {str(e)}"
     set_cache(query, "openai", response)
     return response
 
-# ---------------- Claude ----------------
-async def call_claude(query: str) -> str:
+async def call_claude(query: str, history: list[dict] = None) -> str:
     cached = get_cached(query, "claude")
     if cached:
         return cached
-
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        response = simulate_response("Claude", query)
-        set_cache(query, "claude", response)
-        return response
-
-    # Placeholder for real API call
+    # Simulate Claude, but you can add history logic if API supports it
     response = simulate_response("Claude", query)
     set_cache(query, "claude", response)
     return response
 
-# ---------------- Perplexity ----------------
-async def call_perplexity(query: str) -> str:
+async def call_perplexity(query: str, history: list[dict] = None) -> str:
     cached = get_cached(query, "perplexity")
     if cached:
         return cached
-
-    api_key = os.getenv("PERPLEXITY_API_KEY")
-    if not api_key:
-        response = simulate_response("Perplexity", query)
-        set_cache(query, "perplexity", response)
-        return response
-
-    # Placeholder for real API call
+    # Simulate Perplexity, but you can add history logic if API supports it
     response = simulate_response("Perplexity", query)
     set_cache(query, "perplexity", response)
     return response
 
-# ---------------- Summarizer ----------------
-def summarize_responses(responses: dict) -> str:
-    valid_texts = [text for text in responses.values() if not text.lower().startswith("[")]
+# Helper function to generate AI-powered summary
+async def generate_ai_summary(responses: dict, original_query: str) -> str:
+    """Generate a unified summary using available AI providers in priority order"""
+    valid_responses = {k: v for k, v in responses.items() if not v.startswith("⚠️")}
+    
+    if not valid_responses:
+        return "⚠️ No valid responses received to summarize."
+    
+    # Create summarization prompt
+    responses_text = ""
+    for provider, response in valid_responses.items():
+        responses_text += f"**{provider}**: {response}\n\n"
+    
+    summary_prompt = f"""Please provide a unified, comprehensive summary based on these AI responses to the question: "{original_query}"
+
+AI Responses:
+{responses_text}
+
+Create a cohesive summary that combines the key insights from all responses, eliminates redundancy, and provides the most accurate and complete answer possible. Keep it concise but comprehensive."""
+
+    # Try providers in priority order: OpenAI -> Cohere -> Gemini
+    summary_providers = [
+        ("openai", call_openai),
+        ("cohere", call_cohere), 
+        ("gemini", call_gemini)
+    ]
+    
+    for provider_name, provider_func in summary_providers:
+        try:
+            if provider_name == "openai" and os.getenv("OPENAI_API_KEY"):
+                summary = await provider_func(summary_prompt, [])
+                if not summary.startswith("⚠️"):
+                    return f"🤖 **AI-Generated Summary** (via {provider_name.upper()}):\n\n{summary}"
+            elif provider_name == "cohere" and os.getenv("COHERE_API_KEY"):
+                summary = await provider_func(summary_prompt, [])
+                if not summary.startswith("⚠️"):
+                    return f"🤖 **AI-Generated Summary** (via {provider_name.upper()}):\n\n{summary}"
+            elif provider_name == "gemini" and os.getenv("GEMINI_API_KEY"):
+                summary = await provider_func(summary_prompt, [])
+                if not summary.startswith("⚠️"):
+                    return f"🤖 **AI-Generated Summary** (via {provider_name.upper()}):\n\n{summary}"
+        except Exception as e:
+            continue
+    
+    # Fallback to simple concatenation if no AI summarizer is available
+    return f"📝 **Combined Responses** (AI summarization unavailable):\n\n" + "\n\n---\n\n".join([f"**{k}**: {v}" for k, v in valid_responses.items()])
+
+def summarize_responses(responses: dict, original_query: str = "") -> str:
+    """Legacy function maintained for compatibility - now calls generate_ai_summary"""
+    # Simple fallback for synchronous calls
+    valid_texts = [v for v in responses.values() if not v.startswith("⚠️")]
     if not valid_texts:
         return "⚠️ No valid responses received."
-    return " ".join(valid_texts)
+    
+    # For synchronous calls, return simple concatenation
+    return "\n\n---\n\n".join([f"**{k}**: {v}" for k, v in responses.items() if not v.startswith("⚠️")])
 
 @app.post("/ask")
 async def ask(request: QueryRequest):
     query = request.query
     selected_providers = request.providers
+    history = request.history or []
     results = {}
     sources_used = []
 
     tasks = []
     for provider in selected_providers:
-        if provider == "gemini":
-            tasks.append(call_gemini(query))
-        elif provider == "cohere":
-            tasks.append(call_cohere(query))
-        elif provider == "openai":
-            tasks.append(call_openai(query))
-        elif provider == "claude":
-            tasks.append(call_claude(query))
-        elif provider == "perplexity":
-            tasks.append(call_perplexity(query))
+        p_lower = provider.lower()
+        if p_lower=="gemini":
+            tasks.append(call_gemini(query, history))
+        elif p_lower=="cohere":
+            tasks.append(call_cohere(query, history))
+        elif p_lower=="openai":
+            tasks.append(call_openai(query, history))
+        elif p_lower=="claude":
+            tasks.append(call_claude(query, history))
+        elif p_lower=="perplexity":
+            tasks.append(call_perplexity(query, history))
         else:
-            # simulated
-            tasks.append(call_placeholder(provider.capitalize(), query))
+            tasks.append(asyncio.sleep(0, result=simulate_response(provider.capitalize(), query)))
         sources_used.append(provider.capitalize())
 
-    responses = await asyncio.gather(*tasks)
-
+    responses_list = await asyncio.gather(*tasks)
     for i, provider in enumerate(selected_providers):
-        results[provider] = responses[i]
+        results[provider] = responses_list[i]
 
-    summary = summarize_responses(results)
+    # Generate AI-powered summary
+    summary = await generate_ai_summary(results, query)
 
     return {
         "query": query,
