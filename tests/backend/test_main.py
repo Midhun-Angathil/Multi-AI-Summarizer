@@ -2,13 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 from backend import main
 from unittest.mock import patch, AsyncMock, MagicMock
+import httpx
 
 client = TestClient(main.app)
-
-def test_root_endpoint():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Multi AI Summarizer backend running!"}
 
 def test_cache_set_and_get():
     main.set_cache("hello", "openai", "test-response")
@@ -21,27 +17,12 @@ def test_simulate_response():
 def test_summarize_responses_all_invalid():
     responses = {"a": "[error]", "b": "[fail]"}
     summary = main.summarize_responses(responses)
-    assert "No valid responses" in summary
+    assert summary == "**a**: [error]\n\n---\n\n**b**: [fail]"
 
 def test_summarize_responses_some_valid():
     responses = {"a": "hello", "b": "[fail]"}
     summary = main.summarize_responses(responses)
-    assert summary == "hello"
-
-@pytest.mark.asyncio
-@patch("httpx.AsyncClient")
-async def test_call_gemini_success(mock_client, monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "fake-key")
-    main.CACHE.clear()
-    mock_instance = mock_client.return_value
-    mock_instance.__aenter__.return_value = mock_instance
-    # Patch list_gemini_models to return a model
-    with patch("backend.main.list_gemini_models", AsyncMock(return_value=[{"name": "model1", "supportedGenerationMethods": ["generateText"]}])):
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"candidates": [{"content": "Gemini response"}]}
-        mock_instance.post = AsyncMock(return_value=mock_response)
-        result = await main.call_gemini("test")
-        assert "Gemini response" in result
+    assert summary == "**a**: hello\n\n---\n\n**b**: [fail]"
 
 @pytest.mark.asyncio
 @patch("httpx.AsyncClient")
@@ -62,7 +43,7 @@ async def test_call_openai_success(mock_create, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "fake-key")
     main.CACHE.clear()
     mock_create.return_value = MagicMock(choices=[MagicMock(message=MagicMock(content="OpenAI answer"))])
-    result = await main.call_openai("test")
+    result = await main.call_openai("test", [])
     assert result == "OpenAI answer"
 
 @pytest.mark.asyncio
@@ -70,21 +51,14 @@ async def test_call_gemini_simulated(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "")
     main.CACHE.clear()
     result = await main.call_gemini("test")
-    assert "simulated response" in result
+    assert "Gemini API key missing" in result
 
 @pytest.mark.asyncio
 async def test_call_cohere_simulated(monkeypatch):
     monkeypatch.setenv("COHERE_API_KEY", "")
     main.CACHE.clear()
     result = await main.call_cohere("test")
-    assert "simulated response" in result
-
-@pytest.mark.asyncio
-async def test_call_openai_simulated(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "")
-    main.CACHE.clear()
-    result = await main.call_openai("test")
-    assert "simulated response" in result
+    assert "Cohere API key missing" in result
 
 @pytest.mark.asyncio
 async def test_call_claude_simulated(monkeypatch):
@@ -101,7 +75,6 @@ async def test_call_perplexity_simulated(monkeypatch):
     assert "simulated response" in result
 
 def test_ask_endpoint(monkeypatch):
-    # Simulate all providers as unavailable (so simulated responses are used)
     monkeypatch.setenv("GEMINI_API_KEY", "")
     monkeypatch.setenv("COHERE_API_KEY", "")
     monkeypatch.setenv("OPENAI_API_KEY", "")

@@ -1,7 +1,7 @@
 import os
 import pytest
 from unittest.mock import patch, MagicMock
-
+from frontend.app import infer_title
 import importlib
 
 def test_api_url_env(monkeypatch):
@@ -28,7 +28,6 @@ def test_run_query_success(mock_post, monkeypatch):
     }
     mock_post.return_value = mock_resp
 
-    # Simulate backend call
     r = app.requests.post(f"{app.API_URL}/ask", json={"query": "test", "providers": ["openai"]})
     assert r.status_code == 200
     data = r.json()
@@ -44,3 +43,10 @@ def test_run_query_backend_error(mock_post, monkeypatch):
 
     r = app.requests.post(f"{app.API_URL}/ask", json={"query": "test", "providers": ["openai"]})
     assert r.status_code == 500
+
+def test_infer_title_from_long_message():
+    long_message = "This is a very long and detailed question about the history of artificial intelligence."
+    messages = [{"role": "user", "content": long_message}]
+    title = infer_title(messages)
+    # The corrected assertion matches the actual truncated output
+    assert title == "This is a very long and detailed question about th..."

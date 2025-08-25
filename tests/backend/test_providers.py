@@ -64,9 +64,7 @@ async def test_ask_perplexity_success(mock_client, monkeypatch):
     mock_instance = mock_client.return_value
     mock_instance.__aenter__.return_value = mock_instance
     mock_response = MagicMock()
-    mock_response.json.return_value = {
-        "choices": [{"message": {"content": "Perplexity answer"}}]
-    }
+    mock_response.json.return_value = {"choices": [{"message": {"content": "Perplexity answer"}}]}
     mock_instance.post = AsyncMock(return_value=mock_response)
     result = await providers.ask_perplexity("test")
     assert result == "Perplexity answer"
