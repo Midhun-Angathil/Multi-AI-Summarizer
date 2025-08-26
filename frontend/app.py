@@ -716,7 +716,7 @@ with st.sidebar:
     st.markdown("### 💝 Support Us")
     st.markdown("""
     <div style="text-align:center; margin-top:10px;">
-        <a href="https://www.paypal.com/donate?business=multiaisummarizer@gmail.com&currency_code=USD"
+        <a href="https://www.paypal.com/donate?business=midhun.angathil@gmail.com&currency_code=USD"
            target="_blank"
            style="text-decoration:none; color:#fff; background-color:#ff6600;
                   padding:6px 12px; border-radius:6px; font-weight:bold; 
