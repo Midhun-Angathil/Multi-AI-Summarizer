@@ -30,7 +30,8 @@ st.markdown("""
         min-width: 280px !important;
     }
     
-    /* Override Streamlit's default mobile hiding */
+    /* MOBILE TEXT VISIBILITY FIXES */
+    /* Fix sidebar text colors for mobile */
     @media (max-width: 768px) {
         /* Keep sidebar visible on mobile */
         .css-1d391kg {
@@ -38,12 +39,71 @@ st.markdown("""
             width: 250px !important;
             min-width: 250px !important;
             transform: none !important;
+            background-color: #1e1e1e !important; /* Darker background for better contrast */
         }
         
         .css-1lcbmhc {
             display: block !important;
             width: 250px !important;
             min-width: 250px !important;
+            background-color: #1e1e1e !important;
+        }
+        
+        /* Force white text in sidebar for mobile */
+        .css-1d391kg * {
+            color: #ffffff !important;
+        }
+        
+        .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3, .css-1d391kg h4 {
+            color: #ffffff !important;
+        }
+        
+        /* Fix multiselect text visibility */
+        .css-1d391kg .stMultiSelect label {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+        
+        .css-1d391kg .stMultiSelect > div > div {
+            background-color: #2d2d2d !important;
+            border: 1px solid #4a4a4a !important;
+        }
+        
+        .css-1d391kg .stMultiSelect [data-baseweb="tag"] {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        
+        /* Fix button text visibility in sidebar */
+        .css-1d391kg .stButton button {
+            background-color: #2d2d2d !important;
+            color: #ffffff !important;
+            border: 1px solid #4a4a4a !important;
+        }
+        
+        .css-1d391kg .stButton button[kind="primary"] {
+            background-color: #ff4444 !important;
+            color: white !important;
+        }
+        
+        /* Fix info text visibility */
+        .css-1d391kg .stInfo {
+            background-color: #2d4a5d !important;
+            color: #ffffff !important;
+        }
+        
+        .css-1d391kg .stInfo > div {
+            color: #ffffff !important;
+        }
+        
+        /* Fix warning text visibility */
+        .css-1d391kg .stWarning {
+            background-color: #5d4a2d !important;
+            color: #ffffff !important;
+        }
+        
+        .css-1d391kg .stWarning > div {
+            color: #ffffff !important;
         }
         
         /* Adjust main content area */
@@ -76,6 +136,40 @@ st.markdown("""
         .css-1d391kg h3 {
             font-size: 14px !important;
             margin-bottom: 0.5rem !important;
+            color: #ffffff !important;
+        }
+        
+        /* Fix chat input styling for mobile */
+        .stChatInput > div {
+            border: 2px solid #4CAF50 !important;
+            border-radius: 25px !important;
+            background: linear-gradient(135deg, #ffffff, #f8f8f8) !important;
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.2) !important;
+            margin: 10px 5px !important;
+        }
+        
+        .stChatInput > div:focus-within {
+            border-color: #66BB6A !important;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3) !important;
+            transform: none !important; /* Remove transform for mobile */
+        }
+        
+        /* Adjust chat input label for mobile */
+        .stChatInput > div::before {
+            font-size: 12px !important;
+            top: -28px !important;
+            left: 10px !important;
+            padding: 2px 8px !important;
+            background: var(--background-color, #ffffff) !important;
+            color: #4CAF50 !important;
+            animation: none !important; /* Remove animation on mobile */
+        }
+        
+        .stChatInput input {
+            font-size: 14px !important;
+            padding: 10px 15px !important;
+            color: #333 !important;
+            background: transparent !important;
         }
     }
     
@@ -94,12 +188,26 @@ st.markdown("""
             width: 250px !important;
             height: 100vh !important;
             z-index: 999999 !important;
-            background: var(--background-color, #0e1117) !important;
+            background: #1e1e1e !important;
         }
         
         /* Ensure main content doesn't overlap */
         .main {
             margin-left: 250px !important;
+        }
+        
+        /* Fix chat input for OnePlus devices */
+        .stChatInput > div {
+            border: 2px solid #4CAF50 !important;
+            border-radius: 20px !important;
+            background: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2) !important;
+            transform: none !important;
+        }
+        
+        .stChatInput > div::before {
+            animation: none !important;
+            box-shadow: none !important;
         }
     }
     
@@ -113,6 +221,20 @@ st.markdown("""
             top: 0 !important;
             height: 100vh !important;
             z-index: 999999 !important;
+            background: #1e1e1e !important;
+        }
+        
+        /* Simplified chat input for very old devices */
+        .stChatInput > div {
+            border: 1px solid #4CAF50 !important;
+            border-radius: 15px !important;
+            background: #ffffff !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+        
+        .stChatInput > div::before {
+            display: none !important; /* Hide label on very old devices */
         }
     }
     
@@ -146,7 +268,8 @@ st.markdown("""
         }
     }
 
-    /* ORIGINAL CSS - Mobile-first responsive design - Enhanced for cross-device compatibility */
+    /* ORIGINAL CSS - Desktop styles preserved */
+    /* Mobile-first responsive design - Enhanced for cross-device compatibility */
     @media (max-width: 768px) {
         .stButton button {
             width: 100%;
@@ -156,13 +279,6 @@ st.markdown("""
         .chat-message {
             font-size: 14px;
             padding: 8px !important;
-        }
-        
-        .stChatInput > div::before {
-            font-size: 12px;
-            top: -30px;
-            left: 10px;
-            padding: 3px 8px;
         }
         
         .footer-section {
@@ -182,14 +298,56 @@ st.markdown("""
         }
     }
     
-    /* Desktop optimization */
+    /* Desktop optimization - PRESERVED */
     @media (min-width: 1025px) {
         .main .block-container {
             max-width: 1200px;
         }
+        
+        /* Keep original desktop chat input styling */
+        .stChatInput > div {
+            border: 3px solid #4CAF50 !important;
+            border-radius: 30px !important;
+            background: linear-gradient(135deg, #1e3a1e, #2d5a2d) !important;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3) !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .stChatInput > div:focus-within {
+            border-color: #66BB6A !important;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4) !important;
+            transform: translateY(-3px);
+        }
+        
+        .stChatInput > div::before {
+            content: "💬 Type your question here - AI is ready to help!";
+            position: absolute;
+            top: -35px;
+            left: 15px;
+            font-size: 14px;
+            color: #4CAF50;
+            font-weight: 600;
+            background: var(--background-color, #0e1117);
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid #4CAF50;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+            to { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
+        }
+        
+        .stChatInput input {
+            font-size: 16px !important;
+            padding: 12px 20px !important;
+            color: #333 !important;
+        }
     }
     
-    /* Chat message styling */
+    /* Chat message styling - PRESERVED */
     .user-message {
         padding: 12px;
         margin: 8px 0;
@@ -318,7 +476,7 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Enhanced chat input styling - Cross-device compatible */
+    /* Enhanced chat input styling - Desktop preserved */
     .stChatInput {
         position: sticky;
         bottom: 0;
@@ -327,49 +485,6 @@ st.markdown("""
         padding: 15px 0;
         border-top: 3px solid #4CAF50;
         box-shadow: 0 -4px 15px rgba(76, 175, 80, 0.2);
-    }
-    
-    /* Make chat input more prominent with dark theme compatibility */
-    .stChatInput > div {
-        border: 3px solid #4CAF50 !important;
-        border-radius: 30px !important;
-        background: linear-gradient(135deg, #1e3a1e, #2d5a2d) !important;
-        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3) !important;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    
-    .stChatInput > div:focus-within {
-        border-color: #66BB6A !important;
-        box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4) !important;
-        transform: translateY(-3px);
-    }
-    
-    /* Add a prominent label above input */
-    .stChatInput > div::before {
-        content: "💬 Type your question here - AI is ready to help!";
-        position: absolute;
-        top: -35px;
-        left: 15px;
-        font-size: 14px;
-        color: #4CAF50;
-        font-weight: 600;
-        background: var(--background-color, #0e1117);
-        padding: 4px 12px;
-        border-radius: 15px;
-        border: 1px solid #4CAF50;
-        animation: glow 2s ease-in-out infinite alternate;
-    }
-    
-    @keyframes glow {
-        from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
-        to { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
-    }
-    
-    .stChatInput input {
-        font-size: 16px !important;
-        padding: 12px 20px !important;
-        color: #333 !important;
     }
     
     .stChatInput input::placeholder {
