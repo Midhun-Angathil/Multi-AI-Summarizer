@@ -8,23 +8,146 @@ API_URL = os.getenv("SUMMARIZER_API_URL", "http://127.0.0.1:8000")
 st.set_page_config(
     page_title="Multi AI Summarizer", 
     layout="wide",
-    initial_sidebar_state="auto",  # Auto-collapse on mobile
+    initial_sidebar_state="expanded",  # FIXED: Changed from "auto" to "expanded"
     menu_items={
         'About': "Multi AI Summarizer - Compare responses from multiple AI providers and get intelligent unified summaries!"
     }
 )
 
-# Custom CSS for responsive design and better styling
+# Custom CSS for responsive design and better styling + Mobile Sidebar Fixes
 st.markdown("""
 <style>
-    /* Mobile-first responsive design - Enhanced for cross-device compatibility */
+    /* MOBILE SIDEBAR FIXES - Force sidebar visibility on all devices */
+    /* Force sidebar visibility on all screen sizes */
+    .css-1d391kg {
+        width: 280px !important;
+        min-width: 280px !important;
+    }
+    
+    /* Streamlit sidebar container fixes */
+    .css-1lcbmhc {
+        width: 280px !important;
+        min-width: 280px !important;
+    }
+    
+    /* Override Streamlit's default mobile hiding */
     @media (max-width: 768px) {
-        .main .block-container {
-            padding-left: 1rem;
-            padding-right: 1rem;
-            max-width: 100%;
+        /* Keep sidebar visible on mobile */
+        .css-1d391kg {
+            display: block !important;
+            width: 250px !important;
+            min-width: 250px !important;
+            transform: none !important;
         }
         
+        .css-1lcbmhc {
+            display: block !important;
+            width: 250px !important;
+            min-width: 250px !important;
+        }
+        
+        /* Adjust main content area */
+        .main .block-container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: calc(100% - 250px) !important;
+            margin-left: 250px !important;
+        }
+        
+        /* Make sidebar scrollable on small screens */
+        .css-1d391kg {
+            overflow-y: auto !important;
+            height: 100vh !important;
+        }
+        
+        /* Reduce sidebar button sizes for mobile */
+        .css-1d391kg .stButton button {
+            font-size: 12px !important;
+            padding: 0.25rem 0.5rem !important;
+            margin: 0.1rem 0 !important;
+        }
+        
+        /* Smaller multiselect on mobile */
+        .css-1d391kg .stMultiSelect {
+            font-size: 12px !important;
+        }
+        
+        /* Compact chat history titles */
+        .css-1d391kg h3 {
+            font-size: 14px !important;
+            margin-bottom: 0.5rem !important;
+        }
+    }
+    
+    /* Specific fixes for OnePlus and older Android devices */
+    @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 768px) {
+        /* Force sidebar to be visible with higher specificity */
+        .css-1d391kg, 
+        .css-1lcbmhc,
+        section[data-testid="stSidebar"] {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 250px !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            background: var(--background-color, #0e1117) !important;
+        }
+        
+        /* Ensure main content doesn't overlap */
+        .main {
+            margin-left: 250px !important;
+        }
+    }
+    
+    /* Fallback for very old browsers */
+    @media only screen and (max-device-width: 480px) {
+        .css-1d391kg {
+            display: block !important;
+            width: 240px !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+        }
+    }
+    
+    /* Alternative approach: Add a toggle button for very problematic devices */
+    .mobile-sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1000000;
+        background: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+        .mobile-sidebar-toggle {
+            display: block;
+        }
+        
+        .sidebar-hidden .css-1d391kg {
+            transform: translateX(-100%) !important;
+        }
+        
+        .sidebar-hidden .main {
+            margin-left: 0 !important;
+        }
+    }
+
+    /* ORIGINAL CSS - Mobile-first responsive design - Enhanced for cross-device compatibility */
+    @media (max-width: 768px) {
         .stButton button {
             width: 100%;
             margin: 0.25rem 0;
@@ -308,6 +431,35 @@ st.markdown("""
         100% { border-color: #64b5f6; }
     }
 </style>
+""", unsafe_allow_html=True)
+
+# JavaScript toggle for problematic devices
+st.markdown("""
+<script>
+// Add toggle functionality for very old devices
+document.addEventListener('DOMContentLoaded', function() {
+    // Create toggle button
+    const toggleButton = document.createElement('button');
+    toggleButton.innerHTML = '☰ Menu';
+    toggleButton.className = 'mobile-sidebar-toggle';
+    toggleButton.onclick = function() {
+        document.body.classList.toggle('sidebar-hidden');
+        this.innerHTML = document.body.classList.contains('sidebar-hidden') ? '☰ Menu' : '✕ Close';
+    };
+    document.body.appendChild(toggleButton);
+    
+    // Auto-detect problematic devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isOldOnePlus = userAgent.includes('oneplus') && !userAgent.includes('chrome/9');
+    const isOldAndroid = /android [4-6]/.test(userAgent);
+    
+    if (isOldOnePlus || isOldAndroid) {
+        // Show toggle button for problematic devices
+        toggleButton.style.display = 'block';
+        console.log('Old device detected, showing sidebar toggle');
+    }
+});
+</script>
 """, unsafe_allow_html=True)
 
 # Initialize session state
