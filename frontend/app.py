@@ -8,303 +8,244 @@ API_URL = os.getenv("SUMMARIZER_API_URL", "http://127.0.0.1:8000")
 st.set_page_config(
     page_title="Multi AI Summarizer", 
     layout="wide",
-    initial_sidebar_state="expanded",  # FIXED: Changed from "auto" to "expanded"
+    initial_sidebar_state="expanded",
     menu_items={
         'About': "Multi AI Summarizer - Compare responses from multiple AI providers and get intelligent unified summaries!"
     }
 )
 
-# Custom CSS for responsive design and better styling + Mobile Sidebar Fixes
+# Enhanced CSS with better mobile support and sidebar toggle
 st.markdown("""
 <style>
-    /* MOBILE SIDEBAR FIXES - Force sidebar visibility on all devices */
-    /* Force sidebar visibility on all screen sizes */
-    .css-1d391kg {
-        width: 280px !important;
-        min-width: 280px !important;
-    }
-    
-    /* Streamlit sidebar container fixes */
-    .css-1lcbmhc {
-        width: 280px !important;
-        min-width: 280px !important;
-    }
-    
-    /* MOBILE TEXT VISIBILITY FIXES */
-    /* Fix sidebar text colors for mobile */
-    @media (max-width: 768px) {
-        /* Keep sidebar visible on mobile */
-        .css-1d391kg {
-            display: block !important;
-            width: 250px !important;
-            min-width: 250px !important;
-            transform: none !important;
-            background-color: #1e1e1e !important; /* Darker background for better contrast */
-        }
-        
-        .css-1lcbmhc {
-            display: block !important;
-            width: 250px !important;
-            min-width: 250px !important;
-            background-color: #1e1e1e !important;
-        }
-        
-        /* Force white text in sidebar for mobile */
-        .css-1d391kg * {
-            color: #ffffff !important;
-        }
-        
-        .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3, .css-1d391kg h4 {
-            color: #ffffff !important;
-        }
-        
-        /* Fix multiselect text visibility */
-        .css-1d391kg .stMultiSelect label {
-            color: #ffffff !important;
-            font-weight: 600 !important;
-        }
-        
-        .css-1d391kg .stMultiSelect > div > div {
-            background-color: #2d2d2d !important;
-            border: 1px solid #4a4a4a !important;
-        }
-        
-        .css-1d391kg .stMultiSelect [data-baseweb="tag"] {
-            background-color: #ff4444 !important;
-            color: white !important;
-        }
-        
-        /* Fix button text visibility in sidebar */
-        .css-1d391kg .stButton button {
-            background-color: #2d2d2d !important;
-            color: #ffffff !important;
-            border: 1px solid #4a4a4a !important;
-        }
-        
-        .css-1d391kg .stButton button[kind="primary"] {
-            background-color: #ff4444 !important;
-            color: white !important;
-        }
-        
-        /* Fix info text visibility */
-        .css-1d391kg .stInfo {
-            background-color: #2d4a5d !important;
-            color: #ffffff !important;
-        }
-        
-        .css-1d391kg .stInfo > div {
-            color: #ffffff !important;
-        }
-        
-        /* Fix warning text visibility */
-        .css-1d391kg .stWarning {
-            background-color: #5d4a2d !important;
-            color: #ffffff !important;
-        }
-        
-        .css-1d391kg .stWarning > div {
-            color: #ffffff !important;
-        }
-        
-        /* Adjust main content area */
-        .main .block-container {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-            max-width: calc(100% - 250px) !important;
-            margin-left: 250px !important;
-        }
-        
-        /* Make sidebar scrollable on small screens */
-        .css-1d391kg {
-            overflow-y: auto !important;
-            height: 100vh !important;
-        }
-        
-        /* Reduce sidebar button sizes for mobile */
-        .css-1d391kg .stButton button {
-            font-size: 12px !important;
-            padding: 0.25rem 0.5rem !important;
-            margin: 0.1rem 0 !important;
-        }
-        
-        /* Smaller multiselect on mobile */
-        .css-1d391kg .stMultiSelect {
-            font-size: 12px !important;
-        }
-        
-        /* Compact chat history titles */
-        .css-1d391kg h3 {
-            font-size: 14px !important;
-            margin-bottom: 0.5rem !important;
-            color: #ffffff !important;
-        }
-        
-        /* Fix chat input styling for mobile */
-        .stChatInput > div {
-            border: 2px solid #4CAF50 !important;
-            border-radius: 25px !important;
-            background: linear-gradient(135deg, #ffffff, #f8f8f8) !important;
-            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.2) !important;
-            margin: 10px 5px !important;
-        }
-        
-        .stChatInput > div:focus-within {
-            border-color: #66BB6A !important;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3) !important;
-            transform: none !important; /* Remove transform for mobile */
-        }
-        
-        /* Adjust chat input label for mobile */
-        .stChatInput > div::before {
-            font-size: 12px !important;
-            top: -28px !important;
-            left: 10px !important;
-            padding: 2px 8px !important;
-            background: var(--background-color, #ffffff) !important;
-            color: #4CAF50 !important;
-            animation: none !important; /* Remove animation on mobile */
-        }
-        
-        .stChatInput input {
-            font-size: 14px !important;
-            padding: 10px 15px !important;
-            color: #333 !important;
-            background: transparent !important;
-        }
-    }
-    
-    /* Specific fixes for OnePlus and older Android devices */
-    @media screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 768px) {
-        /* Force sidebar to be visible with higher specificity */
-        .css-1d391kg, 
-        .css-1lcbmhc,
-        section[data-testid="stSidebar"] {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 250px !important;
-            height: 100vh !important;
-            z-index: 999999 !important;
-            background: #1e1e1e !important;
-        }
-        
-        /* Ensure main content doesn't overlap */
-        .main {
-            margin-left: 250px !important;
-        }
-        
-        /* Fix chat input for OnePlus devices */
-        .stChatInput > div {
-            border: 2px solid #4CAF50 !important;
-            border-radius: 20px !important;
-            background: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2) !important;
-            transform: none !important;
-        }
-        
-        .stChatInput > div::before {
-            animation: none !important;
-            box-shadow: none !important;
-        }
-    }
-    
-    /* Fallback for very old browsers */
-    @media only screen and (max-device-width: 480px) {
-        .css-1d391kg {
-            display: block !important;
-            width: 240px !important;
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            height: 100vh !important;
-            z-index: 999999 !important;
-            background: #1e1e1e !important;
-        }
-        
-        /* Simplified chat input for very old devices */
-        .stChatInput > div {
-            border: 1px solid #4CAF50 !important;
-            border-radius: 15px !important;
-            background: #ffffff !important;
-            box-shadow: none !important;
-            transform: none !important;
-        }
-        
-        .stChatInput > div::before {
-            display: none !important; /* Hide label on very old devices */
-        }
-    }
-    
-    /* Alternative approach: Add a toggle button for very problematic devices */
+    /* MOBILE SIDEBAR TOGGLE SOLUTION */
     .mobile-sidebar-toggle {
         display: none;
         position: fixed;
         top: 10px;
         left: 10px;
-        z-index: 1000000;
+        z-index: 999999;
         background: #ff6b6b;
         color: white;
         border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
         cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
     }
     
+    .mobile-sidebar-toggle:hover {
+        background: #ff5252;
+        transform: translateY(-1px);
+    }
+    
+    /* Show toggle button only on mobile */
     @media (max-width: 768px) {
         .mobile-sidebar-toggle {
-            display: block;
+            display: block !important;
         }
         
-        .sidebar-hidden .css-1d391kg {
+        /* Initially hide sidebar on mobile */
+        .sidebar-hidden .css-1d391kg,
+        .sidebar-hidden .css-1lcbmhc,
+        .sidebar-hidden section[data-testid="stSidebar"] {
             transform: translateX(-100%) !important;
+            transition: transform 0.3s ease;
         }
         
+        /* Show sidebar when not hidden */
+        .sidebar-visible .css-1d391kg,
+        .sidebar-visible .css-1lcbmhc,
+        .sidebar-visible section[data-testid="stSidebar"] {
+            transform: translateX(0) !important;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Adjust main content when sidebar is hidden */
         .sidebar-hidden .main {
             margin-left: 0 !important;
+            padding-left: 1rem !important;
+        }
+        
+        /* Adjust main content when sidebar is visible */
+        .sidebar-visible .main {
+            margin-left: 250px !important;
         }
     }
-
-    /* ORIGINAL CSS - Desktop styles preserved */
-    /* Mobile-first responsive design - Enhanced for cross-device compatibility */
+    
+    /* ENHANCED MOBILE TEXT VISIBILITY FIXES */
     @media (max-width: 768px) {
-        .stButton button {
-            width: 100%;
-            margin: 0.25rem 0;
+        /* Force sidebar styling for better visibility */
+        .css-1d391kg, 
+        .css-1lcbmhc,
+        section[data-testid="stSidebar"] {
+            background: #1a1a1a !important;
+            width: 250px !important;
+            min-width: 250px !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            height: 100vh !important;
+            z-index: 999998 !important;
+            overflow-y: auto !important;
+            border-right: 2px solid #333 !important;
         }
         
-        .chat-message {
-            font-size: 14px;
-            padding: 8px !important;
+        /* Force white text throughout sidebar */
+        .css-1d391kg *, 
+        .css-1lcbmhc *,
+        section[data-testid="stSidebar"] * {
+            color: #ffffff !important;
         }
         
-        .footer-section {
-            max-width: 100%;
-            padding: 10px;
+        /* Specific element text visibility fixes */
+        .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3, .css-1d391kg h4,
+        .css-1lcbmhc h1, .css-1lcbmhc h2, .css-1lcbmhc h3, .css-1lcbmhc h4 {
+            color: #ffffff !important;
+            font-weight: bold !important;
         }
-    }
-    
-    /* Tablet optimization */
-    @media (min-width: 769px) and (max-width: 1024px) {
+        
+        .css-1d391kg p, .css-1lcbmhc p {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Multiselect styling improvements */
+        .css-1d391kg .stMultiSelect label,
+        .css-1lcbmhc .stMultiSelect label {
+            color: #ffffff !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+        }
+        
+        .css-1d391kg .stMultiSelect > div,
+        .css-1lcbmhc .stMultiSelect > div {
+            background-color: #333333 !important;
+            border: 2px solid #555555 !important;
+            border-radius: 8px !important;
+        }
+        
+        .css-1d391kg .stMultiSelect [data-baseweb="tag"],
+        .css-1lcbmhc .stMultiSelect [data-baseweb="tag"] {
+            background-color: #ff6b6b !important;
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        /* Button improvements */
+        .css-1d391kg .stButton button,
+        .css-1lcbmhc .stButton button {
+            background-color: #333333 !important;
+            color: #ffffff !important;
+            border: 2px solid #555555 !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+        }
+        
+        .css-1d391kg .stButton button:hover,
+        .css-1lcbmhc .stButton button:hover {
+            background-color: #444444 !important;
+            border-color: #777777 !important;
+        }
+        
+        .css-1d391kg .stButton button[kind="primary"],
+        .css-1lcbmhc .stButton button[kind="primary"] {
+            background-color: #ff6b6b !important;
+            border-color: #ff6b6b !important;
+            color: white !important;
+        }
+        
+        /* Info and warning boxes */
+        .css-1d391kg .stInfo,
+        .css-1lcbmhc .stInfo {
+            background-color: #2d4a5d !important;
+            border: 1px solid #4a7c9d !important;
+            border-radius: 8px !important;
+        }
+        
+        .css-1d391kg .stInfo > div,
+        .css-1lcbmhc .stInfo > div {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+        
+        .css-1d391kg .stWarning,
+        .css-1lcbmhc .stWarning {
+            background-color: #5d4a2d !important;
+            border: 1px solid #9d7c4a !important;
+            border-radius: 8px !important;
+        }
+        
+        .css-1d391kg .stWarning > div,
+        .css-1lcbmhc .stWarning > div {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+        
+        .css-1d391kg .stSuccess,
+        .css-1lcbmhc .stSuccess {
+            background-color: #2d5d2d !important;
+            border: 1px solid #4a9d4a !important;
+            border-radius: 8px !important;
+        }
+        
+        .css-1d391kg .stSuccess > div,
+        .css-1lcbmhc .stSuccess > div {
+            color: #ffffff !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Main content adjustments */
         .main .block-container {
-            max-width: 900px;
+            padding-left: 70px !important; /* Space for toggle button */
+            padding-right: 1rem !important;
+            max-width: 100% !important;
         }
         
+        /* Chat input improvements for mobile */
+        .stChatInput > div {
+            border: 2px solid #4CAF50 !important;
+            border-radius: 20px !important;
+            background: #ffffff !important;
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3) !important;
+            margin: 10px 5px !important;
+        }
+        
+        .stChatInput > div:focus-within {
+            border-color: #66BB6A !important;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4) !important;
+        }
+        
+        .stChatInput input {
+            font-size: 16px !important;
+            padding: 12px 16px !important;
+            color: #333 !important;
+            font-weight: 500 !important;
+        }
+        
+        .stChatInput input::placeholder {
+            color: #777 !important;
+            font-weight: 400 !important;
+        }
+        
+        /* Remove animated label on mobile for clarity */
         .stChatInput > div::before {
-            font-size: 13px;
+            display: none !important;
         }
     }
     
-    /* Desktop optimization - PRESERVED */
-    @media (min-width: 1025px) {
-        .main .block-container {
-            max-width: 1200px;
+    /* DESKTOP STYLES - PRESERVED */
+    @media (min-width: 769px) {
+        /* Hide toggle button on desktop */
+        .mobile-sidebar-toggle {
+            display: none !important;
         }
         
-        /* Keep original desktop chat input styling */
+        /* Desktop chat input styling - preserved */
         .stChatInput > div {
             border: 3px solid #4CAF50 !important;
             border-radius: 30px !important;
@@ -347,7 +288,8 @@ st.markdown("""
         }
     }
     
-    /* Chat message styling - PRESERVED */
+    /* GENERAL STYLES - Mobile and Desktop */
+    /* Chat message styling */
     .user-message {
         padding: 12px;
         margin: 8px 0;
@@ -377,16 +319,7 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    .provider-response {
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        border-left: 3px solid #28a745;
-        margin-bottom: 12px;
-        line-height: 1.5;
-    }
-    
-    /* Responsive text sizes */
+    /* Intro section styling */
     .intro-section h3 {
         color: #1976d2 !important;
         margin-bottom: 1rem;
@@ -407,16 +340,15 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Significantly tone down the footer section */
+    /* Footer styling */
     .footer-section {
         text-align: center;
         padding: 12px;
         background: rgba(255, 255, 255, 0.03);
         border-radius: 8px;
-        margin: 15px 0;
+        margin: 15px auto;
         border: 1px solid rgba(255, 255, 255, 0.1);
         max-width: 400px;
-        margin: 15px auto;
     }
     
     .footer-section h4 {
@@ -449,8 +381,11 @@ st.markdown("""
         border-color: rgba(255, 255, 255, 0.2) !important;
     }
     
-    /* Loading and status indicators */
-    .status-indicator {
+    /* Status indicators */
+    .status-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
         padding: 8px 12px;
         border-radius: 20px;
         font-size: 12px;
@@ -459,24 +394,24 @@ st.markdown("""
         margin: 4px;
     }
     
-    .status-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
     .status-error {
         background: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        margin: 4px;
     }
     
-    /* Hide Streamlit elements for cleaner UI */
+    /* Hide Streamlit elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Enhanced chat input styling - Desktop preserved */
+    /* Chat input positioning */
     .stChatInput {
         position: sticky;
         bottom: 0;
@@ -491,88 +426,64 @@ st.markdown("""
         color: #666 !important;
         font-weight: 500 !important;
     }
-    
-    /* Add floating action style to New Chat button when no active chat */
-    .new-chat-prompt {
-        position: fixed;
-        bottom: 100px;
-        right: 30px;
-        background: linear-gradient(135deg, #2196f3, #1976d2);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 25px;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
-        animation: pulse 2s infinite;
-        z-index: 999;
-    }
-    
-    @keyframes pulse {
-        0% { box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4); }
-        50% { box-shadow: 0 6px 25px rgba(33, 150, 243, 0.6); }
-        100% { box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4); }
-    }
-    
-    /* Improve the "How It Works" section styling */
-    .intro-section {
-        background: linear-gradient(135deg, #f8f9ff, #ffffff) !important;
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin: 1rem 0;
-        border: 2px solid #e3f2fd;
-        box-shadow: 0 2px 10px rgba(33, 150, 243, 0.1);
-    }
-    
-    /* Make status indicators more subtle */
-    .status-success {
-        background: #f0f8f0;
-        color: #2e7d2e;
-        border: 1px solid #d4edda;
-    }
-    
-    /* Add visual cue for empty state */
-    .empty-state-cue {
-        text-align: center;
-        padding: 40px 20px;
-        background: linear-gradient(135deg, #f8f9ff, #ffffff);
-        border-radius: 15px;
-        border: 2px dashed #2196f3;
-        margin: 20px 0;
-        animation: breathe 3s ease-in-out infinite alternate;
-    }
-    
-    @keyframes breathe {
-        0% { border-color: #2196f3; }
-        100% { border-color: #64b5f6; }
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# JavaScript toggle for problematic devices
+# Enhanced JavaScript for sidebar toggle functionality
 st.markdown("""
 <script>
-// Add toggle functionality for very old devices
 document.addEventListener('DOMContentLoaded', function() {
     // Create toggle button
     const toggleButton = document.createElement('button');
     toggleButton.innerHTML = '☰ Menu';
     toggleButton.className = 'mobile-sidebar-toggle';
+    toggleButton.id = 'mobile-sidebar-toggle';
+    
+    // Initial state: sidebar hidden on mobile
+    let sidebarVisible = false;
+    document.body.classList.add('sidebar-hidden');
+    
     toggleButton.onclick = function() {
-        document.body.classList.toggle('sidebar-hidden');
-        this.innerHTML = document.body.classList.contains('sidebar-hidden') ? '☰ Menu' : '✕ Close';
+        sidebarVisible = !sidebarVisible;
+        
+        if (sidebarVisible) {
+            document.body.classList.remove('sidebar-hidden');
+            document.body.classList.add('sidebar-visible');
+            this.innerHTML = '✕ Close';
+        } else {
+            document.body.classList.remove('sidebar-visible');
+            document.body.classList.add('sidebar-hidden');
+            this.innerHTML = '☰ Menu';
+        }
     };
+    
     document.body.appendChild(toggleButton);
     
-    // Auto-detect problematic devices
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isOldOnePlus = userAgent.includes('oneplus') && !userAgent.includes('chrome/9');
-    const isOldAndroid = /android [4-6]/.test(userAgent);
+    // Auto-hide sidebar when clicking main content on mobile
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && sidebarVisible) {
+            const sidebar = document.querySelector('.css-1d391kg');
+            const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+            
+            if (sidebar && !sidebar.contains(e.target) && e.target !== toggleBtn) {
+                sidebarVisible = false;
+                document.body.classList.remove('sidebar-visible');
+                document.body.classList.add('sidebar-hidden');
+                toggleBtn.innerHTML = '☰ Menu';
+            }
+        }
+    });
     
-    if (isOldOnePlus || isOldAndroid) {
-        // Show toggle button for problematic devices
-        toggleButton.style.display = 'block';
-        console.log('Old device detected, showing sidebar toggle');
-    }
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+        } else {
+            if (!document.body.classList.contains('sidebar-visible')) {
+                document.body.classList.add('sidebar-hidden');
+            }
+        }
+    });
 });
 </script>
 """, unsafe_allow_html=True)
@@ -716,7 +627,7 @@ with st.sidebar:
     st.markdown("### 💝 Support Us")
     st.markdown("""
     <div style="text-align:center; margin-top:10px;">
-        <a href="https://www.paypal.com/donate?business=midhun.angathil@gmail.com&currency_code=USD"
+        <a href="https://www.paypal.com/donate?business=multiaisummarizer@gmail.com&currency_code=USD"
            target="_blank"
            style="text-decoration:none; color:#fff; background-color:#ff6600;
                   padding:6px 12px; border-radius:6px; font-weight:bold; 
@@ -766,7 +677,7 @@ if st.session_state["active_chat"] is None or (st.session_state["show_intro"] an
         st.success("**Perfect for:** Research, creative writing, technical questions, decision making")
     
     if st.session_state["active_chat"] is None:
-        st.info("👈 Click 'New Chat' to get started!")
+        st.info("👆 Click the '☰ Menu' button on mobile or 'New Chat' to get started!")
 
 # Chat interface
 if st.session_state["active_chat"] is not None:
