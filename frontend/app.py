@@ -21,42 +21,70 @@ st.markdown("""
     .mobile-sidebar-toggle {
         display: none;
         position: fixed;
-        top: 15px;
-        left: 15px;
+        top: 10px;
+        left: 10px;
         z-index: 999999;
-        background: #ff6b6b;
+        background: #4CAF50;
         color: white !important;
         border: none;
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 18px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 20px;
         font-weight: bold;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        box-shadow: 0 3px 12px rgba(0,0,0,0.4);
         transition: all 0.3s ease;
-        min-width: 60px;
+        min-width: 44px;
+        min-height: 44px;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .mobile-sidebar-toggle:hover {
-        background: #ff5252 !important;
-        transform: translateY(-2px);
+        background: #45a049 !important;
+        transform: scale(1.05);
     }
     
     .mobile-sidebar-toggle:active {
-        transform: translateY(0);
+        transform: scale(0.95);
     }
     
-    /* Floating toggle button when sidebar is hidden */
+    /* Show toggle on mobile at ALL times */
+    @media (max-width: 768px) {
+        .mobile-sidebar-toggle {
+            display: flex !important;
+        }
+    }
+    
+    /* Hide on desktop completely */
+    @media (min-width: 769px) {
+        .mobile-sidebar-toggle {
+            display: none !important;
+        }
+    }
+    
+    /* Floating toggle button styling */
     .sidebar-hidden .mobile-sidebar-toggle {
-        background: #4CAF50 !important;
-        animation: pulse-toggle 2s infinite;
+        background: #ff6b6b !important;
+        animation: gentle-pulse 3s infinite;
     }
     
-    @keyframes pulse-toggle {
-        0% { box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
-        50% { box-shadow: 0 6px 25px rgba(76, 175, 80, 0.7); }
-        100% { box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
+    .sidebar-visible .mobile-sidebar-toggle {
+        background: #4CAF50 !important;
+        animation: none;
+    }
+    
+    @keyframes gentle-pulse {
+        0%, 100% { 
+            box-shadow: 0 3px 12px rgba(255, 107, 107, 0.4);
+            transform: scale(1);
+        }
+        50% { 
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.6);
+            transform: scale(1.02);
+        }
     }
     
     /* Show toggle button only on mobile */
@@ -169,13 +197,36 @@ st.markdown("""
             box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
         }
         
-        /* Ensure New Chat button is highly visible */
-        .css-1d391kg .stButton button span,
-        .css-1lcbmhc .stButton button span {
+        /* MAXIMUM FORCE for button text visibility */
+        .css-1d391kg .stButton button *,
+        .css-1lcbmhc .stButton button *,
+        .css-1d391kg .stButton button span *,
+        .css-1lcbmhc .stButton button span *,
+        .css-1d391kg .stButton p,
+        .css-1lcbmhc .stButton p {
             color: #ffffff !important;
-            font-weight: bold !important;
+            font-weight: 900 !important;
             font-size: 16px !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Target the specific button content */
+        .css-1d391kg .stButton button[kind="secondary"],
+        .css-1lcbmhc .stButton button[kind="secondary"] {
+            background-color: #2d2d2d !important;
+            color: #ffffff !important;
+            border: 2px solid #ffffff !important;
+        }
+        
+        /* Force all nested elements to be visible */
+        .css-1d391kg .stButton button > *,
+        .css-1lcbmhc .stButton button > * {
+            color: #ffffff !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            font-weight: 900 !important;
         }
         
         .css-1d391kg .stButton button:hover,
@@ -239,16 +290,18 @@ st.markdown("""
             font-weight: 500 !important;
         }
         
-        /* Main content adjustments */
+        /* Main content adjustments for persistent toggle */
         .main .block-container {
-            padding-left: 90px !important; /* More space for toggle button */
+            padding-left: 70px !important; /* Space for always-visible toggle */
             padding-right: 1rem !important;
             max-width: 100% !important;
+            padding-top: 1rem !important;
         }
         
         /* Adjust main content when sidebar is hidden */
         .sidebar-hidden .main .block-container {
-            padding-left: 90px !important; /* Keep space for toggle */
+            padding-left: 70px !important; /* Keep space for toggle */
+            margin-left: 0 !important;
         }
         
         /* Adjust main content when sidebar is visible */
@@ -258,6 +311,7 @@ st.markdown("""
         
         .sidebar-visible .main .block-container {
             padding-left: 1rem !important;
+            margin-left: 0 !important;
         }
         
         /* Chat input improvements for mobile */
@@ -342,50 +396,49 @@ st.markdown("""
         }
     }
     
-    /* AD PLACEMENT STYLES */
+    /* AD PLACEMENT STYLES - SUBTLE VERSION */
     .ad-banner {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border: 1px solid #dee2e6;
-        border-radius: 12px;
-        padding: 15px;
-        margin: 20px auto;
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin: 15px auto;
         text-align: center;
         max-width: 728px;
-        min-height: 90px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6c757d;
-        font-size: 14px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    
-    .ad-banner:hover {
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transform: translateY(-1px);
-    }
-    
-    .ad-sidebar {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 10px;
-        margin: 15px 0;
-        text-align: center;
-        min-height: 120px;
+        min-height: 60px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #888;
         font-size: 12px;
-        transition: all 0.3s ease;
+        font-weight: 400;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+    
+    .ad-banner:hover {
+        opacity: 1;
+    }
+    
+    .ad-sidebar {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 8px;
+        margin: 10px 0;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 10px;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
     }
     
     .ad-sidebar:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
+        opacity: 0.8;
     }
     
     .ad-floating {
@@ -393,85 +446,87 @@ st.markdown("""
         bottom: 20px;
         right: 20px;
         background: #ffffff;
-        border: 2px solid #e3f2fd;
-        border-radius: 12px;
-        padding: 12px;
-        max-width: 300px;
-        min-height: 100px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        padding: 10px;
+        max-width: 250px;
+        min-height: 80px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #666;
-        font-size: 13px;
+        color: #777;
+        font-size: 11px;
+        opacity: 0.8;
         transition: all 0.3s ease;
-    }
-    
-    .ad-floating:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 25px rgba(0,0,0,0.2);
     }
     
     .ad-close {
         position: absolute;
-        top: 5px;
-        right: 8px;
-        background: #ff4444;
+        top: 3px;
+        right: 5px;
+        background: #ccc;
         color: white;
         border: none;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        opacity: 0.7;
     }
     
     .ad-between-chats {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border: 1px solid #ffcc02;
-        border-radius: 10px;
-        padding: 12px;
-        margin: 15px 0;
+        background: rgba(248, 249, 250, 0.5);
+        border: 1px solid rgba(233, 236, 239, 0.5);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 10px 0;
         text-align: center;
-        min-height: 80px;
+        min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #f57c00;
-        font-size: 13px;
-        font-weight: 500;
+        color: #999;
+        font-size: 11px;
+        font-weight: 400;
+        opacity: 0.5;
     }
     
     /* Mobile ad adjustments */
     @media (max-width: 768px) {
         .ad-banner {
             max-width: 100%;
-            margin: 15px 0;
-            min-height: 70px;
-            font-size: 12px;
+            margin: 10px 0;
+            min-height: 50px;
+            font-size: 10px;
+            padding: 8px;
         }
         
         .ad-floating {
-            bottom: 15px;
-            right: 15px;
-            max-width: 250px;
-            min-height: 80px;
-            font-size: 12px;
+            bottom: 80px; /* Above chat input */
+            right: 10px;
+            max-width: 200px;
+            min-height: 60px;
+            font-size: 10px;
+            padding: 8px;
         }
         
         .ad-sidebar {
-            min-height: 100px;
-            margin: 10px 0;
+            min-height: 60px;
+            margin: 8px 0;
+            font-size: 9px;
         }
         
         .ad-between-chats {
-            margin: 10px 0;
-            min-height: 60px;
-            font-size: 12px;
+            margin: 8px 0;
+            min-height: 40px;
+            font-size: 10px;
+            padding: 6px 8px;
         }
     }
     /* GENERAL STYLES - Mobile and Desktop */
@@ -619,18 +674,30 @@ st.markdown("""
 st.markdown("""
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Create toggle button
+    // Create toggle button - ALWAYS VISIBLE ON MOBILE
     const toggleButton = document.createElement('button');
     toggleButton.innerHTML = '☰';
     toggleButton.className = 'mobile-sidebar-toggle';
     toggleButton.id = 'mobile-sidebar-toggle';
-    toggleButton.title = 'Toggle Menu';
+    toggleButton.title = 'Menu';
+    toggleButton.setAttribute('aria-label', 'Toggle sidebar menu');
     
-    // Initial state: sidebar hidden on mobile
-    let sidebarVisible = false;
-    document.body.classList.add('sidebar-hidden');
+    // Initial state: sidebar hidden on mobile, visible on desktop
+    let sidebarVisible = window.innerWidth > 768;
     
-    toggleButton.onclick = function() {
+    // Set initial classes
+    if (window.innerWidth <= 768) {
+        document.body.classList.add('sidebar-hidden');
+        toggleButton.style.display = 'flex';
+    } else {
+        document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+        toggleButton.style.display = 'none';
+    }
+    
+    toggleButton.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         sidebarVisible = !sidebarVisible;
         
         if (sidebarVisible) {
@@ -642,7 +709,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('sidebar-visible');
             document.body.classList.add('sidebar-hidden');
             this.innerHTML = '☰';
-            this.title = 'Toggle Menu';
+            this.title = 'Menu';
         }
     };
     
@@ -651,36 +718,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-hide sidebar when clicking main content on mobile
     document.addEventListener('click', function(e) {
         if (window.innerWidth <= 768 && sidebarVisible) {
-            const sidebar = document.querySelector('.css-1d391kg');
+            const sidebar = document.querySelector('.css-1d391kg, section[data-testid="stSidebar"]');
             const toggleBtn = document.getElementById('mobile-sidebar-toggle');
             
-            if (sidebar && !sidebar.contains(e.target) && e.target !== toggleBtn) {
+            if (sidebar && !sidebar.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
                 sidebarVisible = false;
                 document.body.classList.remove('sidebar-visible');
                 document.body.classList.add('sidebar-hidden');
                 toggleBtn.innerHTML = '☰';
-                toggleBtn.title = 'Toggle Menu';
+                toggleBtn.title = 'Menu';
             }
         }
     });
     
     // Handle window resize
+    let resizeTimeout;
     window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
-            toggleButton.style.display = 'none';
-        } else {
-            toggleButton.style.display = 'block';
-            if (!document.body.classList.contains('sidebar-visible')) {
-                document.body.classList.add('sidebar-hidden');
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            if (window.innerWidth > 768) {
+                // Desktop
+                document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+                toggleButton.style.display = 'none';
+                sidebarVisible = true;
+            } else {
+                // Mobile
+                toggleButton.style.display = 'flex';
+                if (!sidebarVisible) {
+                    document.body.classList.add('sidebar-hidden');
+                    document.body.classList.remove('sidebar-visible');
+                    toggleButton.innerHTML = '☰';
+                } else {
+                    document.body.classList.add('sidebar-visible');
+                    document.body.classList.remove('sidebar-hidden');
+                    toggleButton.innerHTML = '✕';
+                }
             }
-        }
+        }, 100);
     });
-    
-    // Initialize display state
-    if (window.innerWidth <= 768) {
-        toggleButton.style.display = 'block';
-    }
     
     // Ad management functions
     window.closeFloatingAd = function() {
@@ -837,14 +912,10 @@ with st.sidebar:
     # Donation section with responsive design - moved to sidebar bottom
     st.markdown("---")
     
-    # SIDEBAR AD PLACEMENT
+    # SIDEBAR AD PLACEMENT (Subtle)
     st.markdown("""
     <div class="ad-sidebar">
-        <div>
-            📢 <strong>Ad Space</strong><br>
-            Your ad could be here<br>
-            <small>Contact us for rates</small>
-        </div>
+        <small style="color: #777;">Ad</small>
     </div>
     """, unsafe_allow_html=True)
     
@@ -869,11 +940,10 @@ with st.sidebar:
 st.title("🤖 Multi AI Summarizer")
 st.markdown("*Compare and combine responses from multiple AI providers for comprehensive insights*")
 
-# TOP BANNER AD PLACEMENT
+# TOP BANNER AD PLACEMENT (Subtle)
 st.markdown("""
 <div class="ad-banner">
-    📢 <strong>Premium Ad Space Available</strong> | Contact: multiaisummarizer@gmail.com | 
-    <em>Reach thousands of AI enthusiasts daily!</em>
+    <small style="color: #bbb;">Advertisement space</small>
 </div>
 """, unsafe_allow_html=True)
 
@@ -911,12 +981,11 @@ if st.session_state["active_chat"] is None or (st.session_state["show_intro"] an
     if st.session_state["active_chat"] is None:
         st.info("👆 Click the '☰' button on mobile or 'New Chat' to get started!")
 
-# AD BETWEEN INTRO AND CHAT
+# AD BETWEEN INTRO AND CHAT (Subtle)
 if st.session_state["active_chat"] is None or (st.session_state["show_intro"] and not st.session_state["chats"].get(st.session_state["active_chat"], {}).get("messages")):
     st.markdown("""
     <div class="ad-between-chats">
-        💡 <strong>Tip:</strong> Try asking complex questions that benefit from multiple AI perspectives! 
-        | <em>Ad space available here</em>
+        <small>Sponsored content</small>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1070,12 +1139,10 @@ if st.session_state["active_chat"] is not None:
 # Footer - much more subtle now
 st.markdown("---")
 
-# FOOTER BANNER AD
+# FOOTER BANNER AD (Subtle)
 st.markdown("""
 <div class="ad-banner">
-    🚀 <strong>Boost Your Business with AI</strong> | 
-    <em>Advertise to our growing community of AI users</em> | 
-    📧 Get started: multiaisummarizer@gmail.com
+    <small style="color: #aaa;">Advertisement</small>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1089,14 +1156,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# FLOATING AD (appears after 10 seconds)
+# FLOATING AD (Subtle - appears after 15 seconds)
 st.markdown("""
 <div id="floating-ad" class="ad-floating" style="display: none;">
     <button class="ad-close" onclick="closeFloatingAd()">×</button>
     <div>
-        🎯 <strong>Premium AI Access</strong><br>
-        <small>Upgrade for faster responses & more providers</small><br>
-        <em style="color: #2196F3;">Coming Soon!</em>
+        <small style="color: #888;">Premium features coming soon</small>
     </div>
 </div>
 
@@ -1105,6 +1170,6 @@ setTimeout(function() {
     if (typeof showFloatingAd === 'function') {
         showFloatingAd();
     }
-}, 10000); // Show after 10 seconds
+}, 15000); // Show after 15 seconds
 </script>
 """, unsafe_allow_html=True)
