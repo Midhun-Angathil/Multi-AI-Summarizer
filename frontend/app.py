@@ -21,24 +21,42 @@ st.markdown("""
     .mobile-sidebar-toggle {
         display: none;
         position: fixed;
-        top: 10px;
-        left: 10px;
+        top: 15px;
+        left: 15px;
         z-index: 999999;
         background: #ff6b6b;
-        color: white;
+        color: white !important;
         border: none;
-        padding: 10px 15px;
-        border-radius: 8px;
-        font-size: 16px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 18px;
         font-weight: bold;
         cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         transition: all 0.3s ease;
+        min-width: 60px;
+        text-align: center;
     }
     
     .mobile-sidebar-toggle:hover {
-        background: #ff5252;
-        transform: translateY(-1px);
+        background: #ff5252 !important;
+        transform: translateY(-2px);
+    }
+    
+    .mobile-sidebar-toggle:active {
+        transform: translateY(0);
+    }
+    
+    /* Floating toggle button when sidebar is hidden */
+    .sidebar-hidden .mobile-sidebar-toggle {
+        background: #4CAF50 !important;
+        animation: pulse-toggle 2s infinite;
+    }
+    
+    @keyframes pulse-toggle {
+        0% { box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
+        50% { box-shadow: 0 6px 25px rgba(76, 175, 80, 0.7); }
+        100% { box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
     }
     
     /* Show toggle button only on mobile */
@@ -82,8 +100,8 @@ st.markdown("""
         .css-1lcbmhc,
         section[data-testid="stSidebar"] {
             background: #1a1a1a !important;
-            width: 250px !important;
-            min-width: 250px !important;
+            width: 280px !important;
+            min-width: 280px !important;
             position: fixed !important;
             left: 0 !important;
             top: 0 !important;
@@ -93,11 +111,14 @@ st.markdown("""
             border-right: 2px solid #333 !important;
         }
         
-        /* Force white text throughout sidebar */
+        /* Force white text throughout sidebar with higher specificity */
         .css-1d391kg *, 
         .css-1lcbmhc *,
-        section[data-testid="stSidebar"] * {
+        section[data-testid="stSidebar"] *,
+        .css-1d391kg .stButton button,
+        .css-1lcbmhc .stButton button {
             color: #ffffff !important;
+            font-weight: 600 !important;
         }
         
         /* Specific element text visibility fixes */
@@ -134,22 +155,34 @@ st.markdown("""
             font-weight: bold !important;
         }
         
-        /* Button improvements */
+        /* Button improvements with maximum visibility */
         .css-1d391kg .stButton button,
         .css-1lcbmhc .stButton button {
             background-color: #333333 !important;
             color: #ffffff !important;
             border: 2px solid #555555 !important;
             font-weight: bold !important;
-            font-size: 14px !important;
-            padding: 8px 16px !important;
+            font-size: 16px !important;
+            padding: 10px 16px !important;
             border-radius: 8px !important;
+            text-shadow: none !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* Ensure New Chat button is highly visible */
+        .css-1d391kg .stButton button span,
+        .css-1lcbmhc .stButton button span {
+            color: #ffffff !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
         }
         
         .css-1d391kg .stButton button:hover,
         .css-1lcbmhc .stButton button:hover {
             background-color: #444444 !important;
             border-color: #777777 !important;
+            color: #ffffff !important;
         }
         
         .css-1d391kg .stButton button[kind="primary"],
@@ -157,6 +190,13 @@ st.markdown("""
             background-color: #ff6b6b !important;
             border-color: #ff6b6b !important;
             color: white !important;
+        }
+        
+        .css-1d391kg .stButton button[kind="primary"] span,
+        .css-1lcbmhc .stButton button[kind="primary"] span {
+            color: white !important;
+            font-weight: bold !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7) !important;
         }
         
         /* Info and warning boxes */
@@ -201,9 +241,23 @@ st.markdown("""
         
         /* Main content adjustments */
         .main .block-container {
-            padding-left: 70px !important; /* Space for toggle button */
+            padding-left: 90px !important; /* More space for toggle button */
             padding-right: 1rem !important;
             max-width: 100% !important;
+        }
+        
+        /* Adjust main content when sidebar is hidden */
+        .sidebar-hidden .main .block-container {
+            padding-left: 90px !important; /* Keep space for toggle */
+        }
+        
+        /* Adjust main content when sidebar is visible */
+        .sidebar-visible .main {
+            margin-left: 280px !important;
+        }
+        
+        .sidebar-visible .main .block-container {
+            padding-left: 1rem !important;
         }
         
         /* Chat input improvements for mobile */
@@ -288,6 +342,138 @@ st.markdown("""
         }
     }
     
+    /* AD PLACEMENT STYLES */
+    .ad-banner {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 15px;
+        margin: 20px auto;
+        text-align: center;
+        max-width: 728px;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .ad-banner:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    
+    .ad-sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin: 15px 0;
+        text-align: center;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .ad-sidebar:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .ad-floating {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #ffffff;
+        border: 2px solid #e3f2fd;
+        border-radius: 12px;
+        padding: 12px;
+        max-width: 300px;
+        min-height: 100px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 13px;
+        transition: all 0.3s ease;
+    }
+    
+    .ad-floating:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+    }
+    
+    .ad-close {
+        position: absolute;
+        top: 5px;
+        right: 8px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .ad-between-chats {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        border: 1px solid #ffcc02;
+        border-radius: 10px;
+        padding: 12px;
+        margin: 15px 0;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f57c00;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    
+    /* Mobile ad adjustments */
+    @media (max-width: 768px) {
+        .ad-banner {
+            max-width: 100%;
+            margin: 15px 0;
+            min-height: 70px;
+            font-size: 12px;
+        }
+        
+        .ad-floating {
+            bottom: 15px;
+            right: 15px;
+            max-width: 250px;
+            min-height: 80px;
+            font-size: 12px;
+        }
+        
+        .ad-sidebar {
+            min-height: 100px;
+            margin: 10px 0;
+        }
+        
+        .ad-between-chats {
+            margin: 10px 0;
+            min-height: 60px;
+            font-size: 12px;
+        }
+    }
     /* GENERAL STYLES - Mobile and Desktop */
     /* Chat message styling */
     .user-message {
@@ -435,9 +621,10 @@ st.markdown("""
 document.addEventListener('DOMContentLoaded', function() {
     // Create toggle button
     const toggleButton = document.createElement('button');
-    toggleButton.innerHTML = '☰ Menu';
+    toggleButton.innerHTML = '☰';
     toggleButton.className = 'mobile-sidebar-toggle';
     toggleButton.id = 'mobile-sidebar-toggle';
+    toggleButton.title = 'Toggle Menu';
     
     // Initial state: sidebar hidden on mobile
     let sidebarVisible = false;
@@ -449,11 +636,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sidebarVisible) {
             document.body.classList.remove('sidebar-hidden');
             document.body.classList.add('sidebar-visible');
-            this.innerHTML = '✕ Close';
+            this.innerHTML = '✕';
+            this.title = 'Close Menu';
         } else {
             document.body.classList.remove('sidebar-visible');
             document.body.classList.add('sidebar-hidden');
-            this.innerHTML = '☰ Menu';
+            this.innerHTML = '☰';
+            this.title = 'Toggle Menu';
         }
     };
     
@@ -469,7 +658,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 sidebarVisible = false;
                 document.body.classList.remove('sidebar-visible');
                 document.body.classList.add('sidebar-hidden');
-                toggleBtn.innerHTML = '☰ Menu';
+                toggleBtn.innerHTML = '☰';
+                toggleBtn.title = 'Toggle Menu';
             }
         }
     });
@@ -478,12 +668,34 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         if (window.innerWidth > 768) {
             document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+            toggleButton.style.display = 'none';
         } else {
+            toggleButton.style.display = 'block';
             if (!document.body.classList.contains('sidebar-visible')) {
                 document.body.classList.add('sidebar-hidden');
             }
         }
     });
+    
+    // Initialize display state
+    if (window.innerWidth <= 768) {
+        toggleButton.style.display = 'block';
+    }
+    
+    // Ad management functions
+    window.closeFloatingAd = function() {
+        const ad = document.getElementById('floating-ad');
+        if (ad) {
+            ad.style.display = 'none';
+        }
+    };
+    
+    window.showFloatingAd = function() {
+        const ad = document.getElementById('floating-ad');
+        if (ad) {
+            ad.style.display = 'flex';
+        }
+    };
 });
 </script>
 """, unsafe_allow_html=True)
@@ -624,6 +836,18 @@ with st.sidebar:
     
     # Donation section with responsive design - moved to sidebar bottom
     st.markdown("---")
+    
+    # SIDEBAR AD PLACEMENT
+    st.markdown("""
+    <div class="ad-sidebar">
+        <div>
+            📢 <strong>Ad Space</strong><br>
+            Your ad could be here<br>
+            <small>Contact us for rates</small>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("### 💝 Support Us")
     st.markdown("""
     <div style="text-align:center; margin-top:10px;">
@@ -644,6 +868,14 @@ with st.sidebar:
 # Main content area
 st.title("🤖 Multi AI Summarizer")
 st.markdown("*Compare and combine responses from multiple AI providers for comprehensive insights*")
+
+# TOP BANNER AD PLACEMENT
+st.markdown("""
+<div class="ad-banner">
+    📢 <strong>Premium Ad Space Available</strong> | Contact: multiaisummarizer@gmail.com | 
+    <em>Reach thousands of AI enthusiasts daily!</em>
+</div>
+""", unsafe_allow_html=True)
 
 def infer_title(messages):
     for msg in messages:
@@ -677,7 +909,16 @@ if st.session_state["active_chat"] is None or (st.session_state["show_intro"] an
         st.success("**Perfect for:** Research, creative writing, technical questions, decision making")
     
     if st.session_state["active_chat"] is None:
-        st.info("👆 Click the '☰ Menu' button on mobile or 'New Chat' to get started!")
+        st.info("👆 Click the '☰' button on mobile or 'New Chat' to get started!")
+
+# AD BETWEEN INTRO AND CHAT
+if st.session_state["active_chat"] is None or (st.session_state["show_intro"] and not st.session_state["chats"].get(st.session_state["active_chat"], {}).get("messages")):
+    st.markdown("""
+    <div class="ad-between-chats">
+        💡 <strong>Tip:</strong> Try asking complex questions that benefit from multiple AI perspectives! 
+        | <em>Ad space available here</em>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Chat interface
 if st.session_state["active_chat"] is not None:
@@ -828,6 +1069,16 @@ if st.session_state["active_chat"] is not None:
 
 # Footer - much more subtle now
 st.markdown("---")
+
+# FOOTER BANNER AD
+st.markdown("""
+<div class="ad-banner">
+    🚀 <strong>Boost Your Business with AI</strong> | 
+    <em>Advertise to our growing community of AI users</em> | 
+    📧 Get started: multiaisummarizer@gmail.com
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <div class="footer-section">
     <h4>📬 Get in Touch</h4>
@@ -836,4 +1087,24 @@ st.markdown("""
         ✉️ multiaisummarizer@gmail.com
     </a>
 </div>
+""", unsafe_allow_html=True)
+
+# FLOATING AD (appears after 10 seconds)
+st.markdown("""
+<div id="floating-ad" class="ad-floating" style="display: none;">
+    <button class="ad-close" onclick="closeFloatingAd()">×</button>
+    <div>
+        🎯 <strong>Premium AI Access</strong><br>
+        <small>Upgrade for faster responses & more providers</small><br>
+        <em style="color: #2196F3;">Coming Soon!</em>
+    </div>
+</div>
+
+<script>
+setTimeout(function() {
+    if (typeof showFloatingAd === 'function') {
+        showFloatingAd();
+    }
+}, 10000); // Show after 10 seconds
+</script>
 """, unsafe_allow_html=True)
