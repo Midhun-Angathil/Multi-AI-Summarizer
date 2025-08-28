@@ -14,346 +14,212 @@ st.set_page_config(
     }
 )
 
-# Enhanced CSS with better mobile support and sidebar toggle
+# Add Google AdSense script to head
+st.markdown("""
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1587919634342405"
+     crossorigin="anonymous"></script>
+""", unsafe_allow_html=True)
+
+# Enhanced CSS with fixed mobile sidebar functionality
 st.markdown("""
 <style>
-    /* MOBILE SIDEBAR TOGGLE SOLUTION */
-    .mobile-sidebar-toggle {
+    /* MOBILE SIDEBAR SYSTEM - COMPLETELY REWRITTEN */
+    
+    /* Hide Streamlit's default sidebar toggle */
+    button[data-testid="collapsedControl"] {
+        display: none !important;
+    }
+    
+    /* Custom mobile toggle button */
+    .mobile-menu-btn {
         display: none;
         position: fixed;
-        top: 10px;
-        left: 10px;
+        top: 15px;
+        left: 15px;
         z-index: 999999;
         background: #4CAF50;
-        color: white !important;
+        color: white;
         border: none;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 20px;
-        font-weight: bold;
+        padding: 12px;
+        border-radius: 50%;
+        font-size: 18px;
         cursor: pointer;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         transition: all 0.3s ease;
-        min-width: 44px;
-        min-height: 44px;
-        text-align: center;
+        width: 50px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-weight: bold;
     }
     
-    .mobile-sidebar-toggle:hover {
-        background: #45a049 !important;
-        transform: scale(1.05);
+    .mobile-menu-btn:hover {
+        background: #45a049;
+        transform: scale(1.1);
     }
     
-    .mobile-sidebar-toggle:active {
-        transform: scale(0.95);
+    .mobile-menu-btn:active {
+        transform: scale(0.9);
     }
     
-    /* Show toggle on mobile at ALL times */
+    /* Mobile overlay for sidebar */
+    .mobile-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999997;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .mobile-overlay.active {
+        opacity: 1;
+    }
+    
+    /* Close button inside sidebar */
+    .sidebar-close-btn {
+        display: none;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 8px;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+        width: 35px;
+        height: 35px;
+        z-index: 1000000;
+    }
+    
+    /* Mobile styles */
     @media (max-width: 768px) {
-        .mobile-sidebar-toggle {
+        /* Show mobile elements */
+        .mobile-menu-btn {
             display: flex !important;
         }
-    }
-    
-    /* Hide on desktop completely */
-    @media (min-width: 769px) {
-        .mobile-sidebar-toggle {
-            display: none !important;
-        }
-    }
-    
-    /* Floating toggle button styling */
-    .sidebar-hidden .mobile-sidebar-toggle {
-        background: #ff6b6b !important;
-        animation: gentle-pulse 3s infinite;
-    }
-    
-    .sidebar-visible .mobile-sidebar-toggle {
-        background: #4CAF50 !important;
-        animation: none;
-    }
-    
-    @keyframes gentle-pulse {
-        0%, 100% { 
-            box-shadow: 0 3px 12px rgba(255, 107, 107, 0.4);
-            transform: scale(1);
-        }
-        50% { 
-            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.6);
-            transform: scale(1.02);
-        }
-    }
-    
-    /* Show toggle button only on mobile */
-    @media (max-width: 768px) {
-        .mobile-sidebar-toggle {
+        
+        .sidebar-close-btn {
             display: block !important;
         }
         
-        /* Initially hide sidebar on mobile */
-        .sidebar-hidden .css-1d391kg,
-        .sidebar-hidden .css-1lcbmhc,
-        .sidebar-hidden section[data-testid="stSidebar"] {
-            transform: translateX(-100%) !important;
-            transition: transform 0.3s ease;
+        .mobile-overlay {
+            display: block !important;
         }
         
-        /* Show sidebar when not hidden */
-        .sidebar-visible .css-1d391kg,
-        .sidebar-visible .css-1lcbmhc,
-        .sidebar-visible section[data-testid="stSidebar"] {
-            transform: translateX(0) !important;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Adjust main content when sidebar is hidden */
-        .sidebar-hidden .main {
-            margin-left: 0 !important;
-            padding-left: 1rem !important;
-        }
-        
-        /* Adjust main content when sidebar is visible */
-        .sidebar-visible .main {
-            margin-left: 250px !important;
-        }
-    }
-    
-    /* ENHANCED MOBILE TEXT VISIBILITY FIXES */
-    @media (max-width: 768px) {
-        /* Force sidebar styling for better visibility */
-        .css-1d391kg, 
-        .css-1lcbmhc,
+        /* Sidebar positioning and behavior */
         section[data-testid="stSidebar"] {
-            background: #1a1a1a !important;
-            width: 280px !important;
-            min-width: 280px !important;
             position: fixed !important;
-            left: 0 !important;
             top: 0 !important;
+            left: -320px !important;
+            width: 300px !important;
             height: 100vh !important;
             z-index: 999998 !important;
-            overflow-y: auto !important;
+            transition: left 0.3s ease !important;
+            background: #1a1a1a !important;
             border-right: 2px solid #333 !important;
+            overflow-y: auto !important;
+            padding-top: 60px !important;
         }
         
-        /* Force white text throughout sidebar with higher specificity */
-        .css-1d391kg *, 
-        .css-1lcbmhc *,
-        section[data-testid="stSidebar"] *,
-        .css-1d391kg .stButton button,
-        .css-1lcbmhc .stButton button {
+        section[data-testid="stSidebar"].mobile-open {
+            left: 0 !important;
+        }
+        
+        /* Main content adjustments */
+        .main .block-container {
+            padding-left: 80px !important;
+            padding-right: 20px !important;
+            padding-top: 20px !important;
+        }
+        
+        /* Sidebar content styling for mobile */
+        section[data-testid="stSidebar"] .css-1d391kg,
+        section[data-testid="stSidebar"] .css-1lcbmhc,
+        section[data-testid="stSidebar"] * {
             color: #ffffff !important;
-            font-weight: 600 !important;
         }
         
-        /* Specific element text visibility fixes */
-        .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3, .css-1d391kg h4,
-        .css-1lcbmhc h1, .css-1lcbmhc h2, .css-1lcbmhc h3, .css-1lcbmhc h4 {
-            color: #ffffff !important;
-            font-weight: bold !important;
-        }
-        
-        .css-1d391kg p, .css-1lcbmhc p {
-            color: #ffffff !important;
-            font-weight: 500 !important;
-        }
-        
-        /* Multiselect styling improvements */
-        .css-1d391kg .stMultiSelect label,
-        .css-1lcbmhc .stMultiSelect label {
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
             color: #ffffff !important;
             font-weight: bold !important;
-            font-size: 16px !important;
         }
         
-        .css-1d391kg .stMultiSelect > div,
-        .css-1lcbmhc .stMultiSelect > div {
-            background-color: #333333 !important;
-            border: 2px solid #555555 !important;
-            border-radius: 8px !important;
-        }
-        
-        .css-1d391kg .stMultiSelect [data-baseweb="tag"],
-        .css-1lcbmhc .stMultiSelect [data-baseweb="tag"] {
-            background-color: #ff6b6b !important;
-            color: white !important;
-            font-weight: bold !important;
-        }
-        
-        /* Button improvements with maximum visibility */
-        .css-1d391kg .stButton button,
-        .css-1lcbmhc .stButton button {
+        section[data-testid="stSidebar"] .stButton button {
             background-color: #333333 !important;
             color: #ffffff !important;
             border: 2px solid #555555 !important;
             font-weight: bold !important;
-            font-size: 16px !important;
-            padding: 10px 16px !important;
             border-radius: 8px !important;
-            text-shadow: none !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+            width: 100% !important;
         }
         
-        /* MAXIMUM FORCE for button text visibility */
-        .css-1d391kg .stButton button *,
-        .css-1lcbmhc .stButton button *,
-        .css-1d391kg .stButton button span *,
-        .css-1lcbmhc .stButton button span *,
-        .css-1d391kg .stButton p,
-        .css-1lcbmhc .stButton p {
-            color: #ffffff !important;
-            font-weight: 900 !important;
-            font-size: 16px !important;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-        
-        /* Target the specific button content */
-        .css-1d391kg .stButton button[kind="secondary"],
-        .css-1lcbmhc .stButton button[kind="secondary"] {
-            background-color: #2d2d2d !important;
-            color: #ffffff !important;
-            border: 2px solid #ffffff !important;
-        }
-        
-        /* Force all nested elements to be visible */
-        .css-1d391kg .stButton button > *,
-        .css-1lcbmhc .stButton button > * {
-            color: #ffffff !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            font-weight: 900 !important;
-        }
-        
-        .css-1d391kg .stButton button:hover,
-        .css-1lcbmhc .stButton button:hover {
+        section[data-testid="stSidebar"] .stButton button:hover {
             background-color: #444444 !important;
             border-color: #777777 !important;
-            color: #ffffff !important;
         }
         
-        .css-1d391kg .stButton button[kind="primary"],
-        .css-1lcbmhc .stButton button[kind="primary"] {
+        section[data-testid="stSidebar"] .stButton button[kind="primary"] {
             background-color: #ff6b6b !important;
             border-color: #ff6b6b !important;
             color: white !important;
         }
         
-        .css-1d391kg .stButton button[kind="primary"] span,
-        .css-1lcbmhc .stButton button[kind="primary"] span {
-            color: white !important;
+        /* Multiselect styling */
+        section[data-testid="stSidebar"] .stMultiSelect label {
+            color: #ffffff !important;
             font-weight: bold !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7) !important;
         }
         
-        /* Info and warning boxes */
-        .css-1d391kg .stInfo,
-        .css-1lcbmhc .stInfo {
-            background-color: #2d4a5d !important;
-            border: 1px solid #4a7c9d !important;
+        section[data-testid="stSidebar"] .stMultiSelect > div {
+            background-color: #333333 !important;
+            border: 2px solid #555555 !important;
             border-radius: 8px !important;
         }
         
-        .css-1d391kg .stInfo > div,
-        .css-1lcbmhc .stInfo > div {
+        section[data-testid="stSidebar"] .stMultiSelect [data-baseweb="tag"] {
+            background-color: #ff6b6b !important;
+            color: white !important;
+        }
+        
+        /* Info boxes */
+        section[data-testid="stSidebar"] .stInfo,
+        section[data-testid="stSidebar"] .stWarning,
+        section[data-testid="stSidebar"] .stSuccess {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
             color: #ffffff !important;
-            font-weight: 500 !important;
-        }
-        
-        .css-1d391kg .stWarning,
-        .css-1lcbmhc .stWarning {
-            background-color: #5d4a2d !important;
-            border: 1px solid #9d7c4a !important;
-            border-radius: 8px !important;
-        }
-        
-        .css-1d391kg .stWarning > div,
-        .css-1lcbmhc .stWarning > div {
-            color: #ffffff !important;
-            font-weight: 500 !important;
-        }
-        
-        .css-1d391kg .stSuccess,
-        .css-1lcbmhc .stSuccess {
-            background-color: #2d5d2d !important;
-            border: 1px solid #4a9d4a !important;
-            border-radius: 8px !important;
-        }
-        
-        .css-1d391kg .stSuccess > div,
-        .css-1lcbmhc .stSuccess > div {
-            color: #ffffff !important;
-            font-weight: 500 !important;
-        }
-        
-        /* Main content adjustments for persistent toggle */
-        .main .block-container {
-            padding-left: 70px !important; /* Space for always-visible toggle */
-            padding-right: 1rem !important;
-            max-width: 100% !important;
-            padding-top: 1rem !important;
-        }
-        
-        /* Adjust main content when sidebar is hidden */
-        .sidebar-hidden .main .block-container {
-            padding-left: 70px !important; /* Keep space for toggle */
-            margin-left: 0 !important;
-        }
-        
-        /* Adjust main content when sidebar is visible */
-        .sidebar-visible .main {
-            margin-left: 280px !important;
-        }
-        
-        .sidebar-visible .main .block-container {
-            padding-left: 1rem !important;
-            margin-left: 0 !important;
-        }
-        
-        /* Chat input improvements for mobile */
-        .stChatInput > div {
-            border: 2px solid #4CAF50 !important;
-            border-radius: 20px !important;
-            background: #ffffff !important;
-            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3) !important;
-            margin: 10px 5px !important;
-        }
-        
-        .stChatInput > div:focus-within {
-            border-color: #66BB6A !important;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4) !important;
-        }
-        
-        .stChatInput input {
-            font-size: 16px !important;
-            padding: 12px 16px !important;
-            color: #333 !important;
-            font-weight: 500 !important;
-        }
-        
-        .stChatInput input::placeholder {
-            color: #777 !important;
-            font-weight: 400 !important;
-        }
-        
-        /* Remove animated label on mobile for clarity */
-        .stChatInput > div::before {
-            display: none !important;
         }
     }
     
-    /* DESKTOP STYLES - PRESERVED */
+    /* Desktop styles - keep original behavior */
     @media (min-width: 769px) {
-        /* Hide toggle button on desktop */
-        .mobile-sidebar-toggle {
+        .mobile-menu-btn,
+        .mobile-overlay,
+        .sidebar-close-btn {
             display: none !important;
         }
         
-        /* Desktop chat input styling - preserved */
+        section[data-testid="stSidebar"] {
+            position: relative !important;
+            left: auto !important;
+            width: auto !important;
+            height: auto !important;
+            z-index: auto !important;
+            transition: none !important;
+            padding-top: 0 !important;
+        }
+        
+        /* Desktop chat input styling */
         .stChatInput > div {
             border: 3px solid #4CAF50 !important;
             border-radius: 30px !important;
@@ -388,15 +254,90 @@ st.markdown("""
             from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
             to { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); }
         }
+    }
+    
+    /* Mobile chat input improvements */
+    @media (max-width: 768px) {
+        .stChatInput > div {
+            border: 2px solid #4CAF50 !important;
+            border-radius: 20px !important;
+            background: #ffffff !important;
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3) !important;
+            margin: 10px 5px !important;
+        }
+        
+        .stChatInput > div:focus-within {
+            border-color: #66BB6A !important;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4) !important;
+        }
         
         .stChatInput input {
             font-size: 16px !important;
-            padding: 12px 20px !important;
+            padding: 12px 16px !important;
             color: #333 !important;
+        }
+        
+        .stChatInput input::placeholder {
+            color: #777 !important;
+        }
+        
+        /* Remove desktop label on mobile */
+        .stChatInput > div::before {
+            display: none !important;
         }
     }
     
-    /* AD PLACEMENT STYLES - SUBTLE VERSION */
+    /* GENERAL STYLES */
+    .user-message {
+        padding: 12px;
+        margin: 8px 0;
+        background: linear-gradient(90deg, #e3f2fd, #bbdefb);
+        border-left: 4px solid #2196f3;
+        border-radius: 8px;
+        color: #0d47a1;
+        font-weight: 500;
+    }
+    
+    .ai-summary {
+        padding: 12px;
+        margin: 8px 0;
+        background: linear-gradient(90deg, #e8f5e8, #c8e6c9);
+        border-left: 4px solid #4caf50;
+        border-radius: 8px;
+        color: #1b5e20;
+        font-weight: 500;
+    }
+    
+    .ai-content {
+        padding: 12px;
+        margin: 8px 0 12px 0;
+        background: #f1f8e9;
+        border-radius: 6px;
+        color: #33691e;
+        line-height: 1.6;
+    }
+    
+    .intro-section h3 {
+        color: #1976d2 !important;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .intro-section {
+        background: #f8f9ff !important;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        border: 1px solid #e3f2fd;
+        color: #333 !important;
+    }
+    
+    .intro-section p, .intro-section li, .intro-section div {
+        color: #333 !important;
+        line-height: 1.6;
+    }
+    
+    /* AD PLACEMENT STYLES */
     .ad-banner {
         background: linear-gradient(135deg, #f8f9fa, #ffffff);
         border: 1px solid #e9ecef;
@@ -508,7 +449,7 @@ st.markdown("""
         }
         
         .ad-floating {
-            bottom: 80px; /* Above chat input */
+            bottom: 80px;
             right: 10px;
             max-width: 200px;
             min-height: 60px;
@@ -528,57 +469,6 @@ st.markdown("""
             font-size: 10px;
             padding: 6px 8px;
         }
-    }
-    /* GENERAL STYLES - Mobile and Desktop */
-    /* Chat message styling */
-    .user-message {
-        padding: 12px;
-        margin: 8px 0;
-        background: linear-gradient(90deg, #e3f2fd, #bbdefb);
-        border-left: 4px solid #2196f3;
-        border-radius: 8px;
-        color: #0d47a1;
-        font-weight: 500;
-    }
-    
-    .ai-summary {
-        padding: 12px;
-        margin: 8px 0;
-        background: linear-gradient(90deg, #e8f5e8, #c8e6c9);
-        border-left: 4px solid #4caf50;
-        border-radius: 8px;
-        color: #1b5e20;
-        font-weight: 500;
-    }
-    
-    .ai-content {
-        padding: 12px;
-        margin: 8px 0 12px 0;
-        background: #f1f8e9;
-        border-radius: 6px;
-        color: #33691e;
-        line-height: 1.6;
-    }
-    
-    /* Intro section styling */
-    .intro-section h3 {
-        color: #1976d2 !important;
-        margin-bottom: 1rem;
-        font-weight: 600;
-    }
-    
-    .intro-section {
-        background: #f8f9ff !important;
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin: 1rem 0;
-        border: 1px solid #e3f2fd;
-        color: #333 !important;
-    }
-    
-    .intro-section p, .intro-section li, .intro-section div {
-        color: #333 !important;
-        line-height: 1.6;
     }
     
     /* Footer styling */
@@ -670,111 +560,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Enhanced JavaScript for sidebar toggle functionality
-st.markdown("""
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Create toggle button - ALWAYS VISIBLE ON MOBILE
-    const toggleButton = document.createElement('button');
-    toggleButton.innerHTML = '☰';
-    toggleButton.className = 'mobile-sidebar-toggle';
-    toggleButton.id = 'mobile-sidebar-toggle';
-    toggleButton.title = 'Menu';
-    toggleButton.setAttribute('aria-label', 'Toggle sidebar menu');
-    
-    // Initial state: sidebar hidden on mobile, visible on desktop
-    let sidebarVisible = window.innerWidth > 768;
-    
-    // Set initial classes
-    if (window.innerWidth <= 768) {
-        document.body.classList.add('sidebar-hidden');
-        toggleButton.style.display = 'flex';
-    } else {
-        document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
-        toggleButton.style.display = 'none';
-    }
-    
-    toggleButton.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        sidebarVisible = !sidebarVisible;
-        
-        if (sidebarVisible) {
-            document.body.classList.remove('sidebar-hidden');
-            document.body.classList.add('sidebar-visible');
-            this.innerHTML = '✕';
-            this.title = 'Close Menu';
-        } else {
-            document.body.classList.remove('sidebar-visible');
-            document.body.classList.add('sidebar-hidden');
-            this.innerHTML = '☰';
-            this.title = 'Menu';
-        }
-    };
-    
-    document.body.appendChild(toggleButton);
-    
-    // Auto-hide sidebar when clicking main content on mobile
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 768 && sidebarVisible) {
-            const sidebar = document.querySelector('.css-1d391kg, section[data-testid="stSidebar"]');
-            const toggleBtn = document.getElementById('mobile-sidebar-toggle');
-            
-            if (sidebar && !sidebar.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
-                sidebarVisible = false;
-                document.body.classList.remove('sidebar-visible');
-                document.body.classList.add('sidebar-hidden');
-                toggleBtn.innerHTML = '☰';
-                toggleBtn.title = 'Menu';
-            }
-        }
-    });
-    
-    // Handle window resize
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-            if (window.innerWidth > 768) {
-                // Desktop
-                document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
-                toggleButton.style.display = 'none';
-                sidebarVisible = true;
-            } else {
-                // Mobile
-                toggleButton.style.display = 'flex';
-                if (!sidebarVisible) {
-                    document.body.classList.add('sidebar-hidden');
-                    document.body.classList.remove('sidebar-visible');
-                    toggleButton.innerHTML = '☰';
-                } else {
-                    document.body.classList.add('sidebar-visible');
-                    document.body.classList.remove('sidebar-hidden');
-                    toggleButton.innerHTML = '✕';
-                }
-            }
-        }, 100);
-    });
-    
-    // Ad management functions
-    window.closeFloatingAd = function() {
-        const ad = document.getElementById('floating-ad');
-        if (ad) {
-            ad.style.display = 'none';
-        }
-    };
-    
-    window.showFloatingAd = function() {
-        const ad = document.getElementById('floating-ad');
-        if (ad) {
-            ad.style.display = 'flex';
-        }
-    };
-});
-</script>
-""", unsafe_allow_html=True)
-
 # Initialize session state
 if "chats" not in st.session_state:
     st.session_state["chats"] = {}
@@ -793,8 +578,114 @@ if "confirm_clear_all" not in st.session_state:
 if "chat_to_delete" not in st.session_state:
     st.session_state["chat_to_delete"] = None
 
+# Mobile sidebar functionality - simplified and working
+st.markdown("""
+<div class="mobile-menu-btn" onclick="toggleMobileSidebar()" id="mobileMenuBtn">
+    ☰
+</div>
+<div class="mobile-overlay" onclick="closeMobileSidebar()" id="mobileOverlay"></div>
+
+<script>
+let sidebarOpen = false;
+
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+    const overlay = document.getElementById('mobileOverlay');
+    const btn = document.getElementById('mobileMenuBtn');
+    
+    if (!sidebarOpen) {
+        openMobileSidebar();
+    } else {
+        closeMobileSidebar();
+    }
+}
+
+function openMobileSidebar() {
+    const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+    const overlay = document.getElementById('mobileOverlay');
+    const btn = document.getElementById('mobileMenuBtn');
+    
+    if (sidebar && overlay && btn) {
+        sidebar.classList.add('mobile-open');
+        overlay.classList.add('active');
+        btn.innerHTML = '✕';
+        btn.style.background = '#ff4444';
+        sidebarOpen = true;
+        
+        // Prevent body scrolling when sidebar is open
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeMobileSidebar() {
+    const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+    const overlay = document.getElementById('mobileOverlay');
+    const btn = document.getElementById('mobileMenuBtn');
+    
+    if (sidebar && overlay && btn) {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        btn.innerHTML = '☰';
+        btn.style.background = '#4CAF50';
+        sidebarOpen = false;
+        
+        // Restore body scrolling
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768 && sidebarOpen) {
+        const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+        const btn = document.getElementById('mobileMenuBtn');
+        const overlay = document.getElementById('mobileOverlay');
+        
+        if (sidebar && !sidebar.contains(e.target) && e.target !== btn && e.target !== overlay) {
+            closeMobileSidebar();
+        }
+    }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768 && sidebarOpen) {
+        closeMobileSidebar();
+    }
+});
+
+// Ensure button is visible on mobile
+window.addEventListener('load', function() {
+    const btn = document.getElementById('mobileMenuBtn');
+    if (btn && window.innerWidth <= 768) {
+        btn.style.display = 'flex';
+    }
+});
+
+// Ad management functions
+window.closeFloatingAd = function() {
+    const ad = document.getElementById('floating-ad');
+    if (ad) {
+        ad.style.display = 'none';
+    }
+};
+
+window.showFloatingAd = function() {
+    const ad = document.getElementById('floating-ad');
+    if (ad) {
+        ad.style.display = 'flex';
+    }
+};
+</script>
+""", unsafe_allow_html=True)
+
 # Sidebar configuration
 with st.sidebar:
+    # Close button for mobile
+    st.markdown("""
+    <button class="sidebar-close-btn" onclick="closeMobileSidebar()">✕</button>
+    """, unsafe_allow_html=True)
+    
     st.header("⚙️ Settings")
     
     providers_list = ["OpenAI", "Claude", "Gemini", "Cohere", "Perplexity"]
