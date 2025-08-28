@@ -126,14 +126,15 @@ async def call_openai(query: str, history: list[dict]) -> str:
         set_cache(query, "openai", response)
         return response
     try:
-        openai.api_key = api_key
+        #openai.api_key = api_key
+        client = openai.OpenAI(api_key=api_key)
         # Prompt engineered for concise high-quality summary
         messages = [{"role":"system","content":"Answer concisely and clearly, covering all critical points, avoid verbosity. Use short sentences."}]
         for m in (history or []):
             role = "assistant" if m.get("role")=="ai" else "user"
             messages.append({"role": role, "content": m.get("content","")})
         messages.append({"role":"user","content":query})
-        response_obj = openai.ChatCompletion.create(
+        response_obj = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.4,
