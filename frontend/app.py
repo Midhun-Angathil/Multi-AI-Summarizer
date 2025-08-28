@@ -3,15 +3,10 @@ import requests
 import os
 import time
 
-# Use a consistent session state key for the sidebar
-# This prevents it from disappearing on refreshes
-if 'sidebar_visible' not in st.session_state:
-    st.session_state.sidebar_visible = True
-
 API_URL = os.getenv("SUMMARIZER_API_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(
-    page_title="Multi AI Summarizer",
+    page_title="Multi AI Summarizer", 
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -22,15 +17,9 @@ st.set_page_config(
 # Enhanced CSS with better mobile support and sidebar toggle
 st.markdown("""
 <style>
-    /* Global styles to ensure full-screen layout on all devices */
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    
     /* MOBILE SIDEBAR TOGGLE SOLUTION */
     .mobile-sidebar-toggle {
+        display: none;
         position: fixed;
         top: 10px;
         left: 10px;
@@ -48,7 +37,7 @@ st.markdown("""
         min-width: 44px;
         min-height: 44px;
         text-align: center;
-        display: none; /* Initially hide on all screens and show via media query */
+        display: flex;
         align-items: center;
         justify-content: center;
     }
@@ -62,36 +51,17 @@ st.markdown("""
         transform: scale(0.95);
     }
     
-    /* Show toggle on mobile at ALL times and handle body class */
+    /* Show toggle on mobile at ALL times */
     @media (max-width: 768px) {
         .mobile-sidebar-toggle {
             display: flex !important;
         }
-
-        /* Initially hide sidebar on mobile */
-        body {
-            overflow-x: hidden;
-            transition: margin-left 0.3s ease;
-        }
-
-        .sidebar-hidden section[data-testid="stSidebar"] {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        
-        .sidebar-hidden .st-emotion-cache-1c5t105.e1g8p9av3 {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar-visible section[data-testid="stSidebar"] {
-            transform: translateX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .sidebar-visible .st-emotion-cache-1c5t105.e1g8p9av3 {
-            transform: translateX(0);
-            transition: transform 0.3s ease;
+    }
+    
+    /* Hide on desktop completely */
+    @media (min-width: 769px) {
+        .mobile-sidebar-toggle {
+            display: none !important;
         }
     }
     
@@ -117,10 +87,45 @@ st.markdown("""
         }
     }
     
+    /* Show toggle button only on mobile */
+    @media (max-width: 768px) {
+        .mobile-sidebar-toggle {
+            display: block !important;
+        }
+        
+        /* Initially hide sidebar on mobile */
+        .sidebar-hidden .css-1d391kg,
+        .sidebar-hidden .css-1lcbmhc,
+        .sidebar-hidden section[data-testid="stSidebar"] {
+            transform: translateX(-100%) !important;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Show sidebar when not hidden */
+        .sidebar-visible .css-1d391kg,
+        .sidebar-visible .css-1lcbmhc,
+        .sidebar-visible section[data-testid="stSidebar"] {
+            transform: translateX(0) !important;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Adjust main content when sidebar is hidden */
+        .sidebar-hidden .main {
+            margin-left: 0 !important;
+            padding-left: 1rem !important;
+        }
+        
+        /* Adjust main content when sidebar is visible */
+        .sidebar-visible .main {
+            margin-left: 250px !important;
+        }
+    }
+    
     /* ENHANCED MOBILE TEXT VISIBILITY FIXES */
     @media (max-width: 768px) {
         /* Force sidebar styling for better visibility */
-        .st-emotion-cache-1c5t105.e1g8p9av3,
+        .css-1d391kg, 
+        .css-1lcbmhc,
         section[data-testid="stSidebar"] {
             background: #1a1a1a !important;
             width: 280px !important;
@@ -135,51 +140,52 @@ st.markdown("""
         }
         
         /* Force white text throughout sidebar with higher specificity */
-        .st-emotion-cache-1c5t105.e1g8p9av3 *,
+        .css-1d391kg *, 
+        .css-1lcbmhc *,
         section[data-testid="stSidebar"] *,
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button,
-        section[data-testid="stSidebar"] .stButton button {
+        .css-1d391kg .stButton button,
+        .css-1lcbmhc .stButton button {
             color: #ffffff !important;
             font-weight: 600 !important;
         }
         
         /* Specific element text visibility fixes */
-        .st-emotion-cache-1c5t105.e1g8p9av3 h1, .st-emotion-cache-1c5t105.e1g8p9av3 h2, .st-emotion-cache-1c5t105.e1g8p9av3 h3, .st-emotion-cache-1c5t105.e1g8p9av3 h4,
-        section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] h4 {
+        .css-1d391kg h1, .css-1d391kg h2, .css-1d391kg h3, .css-1d391kg h4,
+        .css-1lcbmhc h1, .css-1lcbmhc h2, .css-1lcbmhc h3, .css-1lcbmhc h4 {
             color: #ffffff !important;
             font-weight: bold !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 p, section[data-testid="stSidebar"] p {
+        .css-1d391kg p, .css-1lcbmhc p {
             color: #ffffff !important;
             font-weight: 500 !important;
         }
         
         /* Multiselect styling improvements */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stMultiSelect label,
-        section[data-testid="stSidebar"] .stMultiSelect label {
+        .css-1d391kg .stMultiSelect label,
+        .css-1lcbmhc .stMultiSelect label {
             color: #ffffff !important;
             font-weight: bold !important;
             font-size: 16px !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stMultiSelect > div,
-        section[data-testid="stSidebar"] .stMultiSelect > div {
+        .css-1d391kg .stMultiSelect > div,
+        .css-1lcbmhc .stMultiSelect > div {
             background-color: #333333 !important;
             border: 2px solid #555555 !important;
             border-radius: 8px !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stMultiSelect [data-baseweb="tag"],
-        section[data-testid="stSidebar"] .stMultiSelect [data-baseweb="tag"] {
+        .css-1d391kg .stMultiSelect [data-baseweb="tag"],
+        .css-1lcbmhc .stMultiSelect [data-baseweb="tag"] {
             background-color: #ff6b6b !important;
             color: white !important;
             font-weight: bold !important;
         }
         
         /* Button improvements with maximum visibility */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button,
-        section[data-testid="stSidebar"] .stButton button {
+        .css-1d391kg .stButton button,
+        .css-1lcbmhc .stButton button {
             background-color: #333333 !important;
             color: #ffffff !important;
             border: 2px solid #555555 !important;
@@ -192,12 +198,12 @@ st.markdown("""
         }
         
         /* MAXIMUM FORCE for button text visibility */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button *,
-        section[data-testid="stSidebar"] .stButton button *,
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button span *,
-        section[data-testid="stSidebar"] .stButton button span *,
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton p,
-        section[data-testid="stSidebar"] .stButton p {
+        .css-1d391kg .stButton button *,
+        .css-1lcbmhc .stButton button *,
+        .css-1d391kg .stButton button span *,
+        .css-1lcbmhc .stButton button span *,
+        .css-1d391kg .stButton p,
+        .css-1lcbmhc .stButton p {
             color: #ffffff !important;
             font-weight: 900 !important;
             font-size: 16px !important;
@@ -207,79 +213,79 @@ st.markdown("""
         }
         
         /* Target the specific button content */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button[kind="secondary"],
-        section[data-testid="stSidebar"] .stButton button[kind="secondary"] {
+        .css-1d391kg .stButton button[kind="secondary"],
+        .css-1lcbmhc .stButton button[kind="secondary"] {
             background-color: #2d2d2d !important;
             color: #ffffff !important;
             border: 2px solid #ffffff !important;
         }
         
         /* Force all nested elements to be visible */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button > *,
-        section[data-testid="stSidebar"] .stButton button > * {
+        .css-1d391kg .stButton button > *,
+        .css-1lcbmhc .stButton button > * {
             color: #ffffff !important;
             opacity: 1 !important;
             visibility: visible !important;
             font-weight: 900 !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button:hover,
-        section[data-testid="stSidebar"] .stButton button:hover {
+        .css-1d391kg .stButton button:hover,
+        .css-1lcbmhc .stButton button:hover {
             background-color: #444444 !important;
             border-color: #777777 !important;
             color: #ffffff !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button[kind="primary"],
-        section[data-testid="stSidebar"] .stButton button[kind="primary"] {
+        .css-1d391kg .stButton button[kind="primary"],
+        .css-1lcbmhc .stButton button[kind="primary"] {
             background-color: #ff6b6b !important;
             border-color: #ff6b6b !important;
             color: white !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stButton button[kind="primary"] span,
-        section[data-testid="stSidebar"] .stButton button[kind="primary"] span {
+        .css-1d391kg .stButton button[kind="primary"] span,
+        .css-1lcbmhc .stButton button[kind="primary"] span {
             color: white !important;
             font-weight: bold !important;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7) !important;
         }
         
         /* Info and warning boxes */
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stInfo,
-        section[data-testid="stSidebar"] .stInfo {
+        .css-1d391kg .stInfo,
+        .css-1lcbmhc .stInfo {
             background-color: #2d4a5d !important;
             border: 1px solid #4a7c9d !important;
             border-radius: 8px !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stInfo > div,
-        section[data-testid="stSidebar"] .stInfo > div {
+        .css-1d391kg .stInfo > div,
+        .css-1lcbmhc .stInfo > div {
             color: #ffffff !important;
             font-weight: 500 !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stWarning,
-        section[data-testid="stSidebar"] .stWarning {
+        .css-1d391kg .stWarning,
+        .css-1lcbmhc .stWarning {
             background-color: #5d4a2d !important;
             border: 1px solid #9d7c4a !important;
             border-radius: 8px !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stWarning > div,
-        section[data-testid="stSidebar"] .stWarning > div {
+        .css-1d391kg .stWarning > div,
+        .css-1lcbmhc .stWarning > div {
             color: #ffffff !important;
             font-weight: 500 !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stSuccess,
-        section[data-testid="stSidebar"] .stSuccess {
+        .css-1d391kg .stSuccess,
+        .css-1lcbmhc .stSuccess {
             background-color: #2d5d2d !important;
             border: 1px solid #4a9d4a !important;
             border-radius: 8px !important;
         }
         
-        .st-emotion-cache-1c5t105.e1g8p9av3 .stSuccess > div,
-        section[data-testid="stSidebar"] .stSuccess > div {
+        .css-1d391kg .stSuccess > div,
+        .css-1lcbmhc .stSuccess > div {
             color: #ffffff !important;
             font-weight: 500 !important;
         }
@@ -523,7 +529,6 @@ st.markdown("""
             padding: 6px 8px;
         }
     }
-    
     /* GENERAL STYLES - Mobile and Desktop */
     /* Chat message styling */
     .user-message {
@@ -668,180 +673,468 @@ st.markdown("""
 # Enhanced JavaScript for sidebar toggle functionality
 st.markdown("""
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleButton = document.createElement('button');
-        toggleButton.innerHTML = '☰';
-        toggleButton.className = 'mobile-sidebar-toggle';
-        toggleButton.id = 'mobile-sidebar-toggle';
-        toggleButton.title = 'Menu';
-        toggleButton.setAttribute('aria-label', 'Toggle sidebar menu');
-        document.body.appendChild(toggleButton);
-
-        const toggleSidebar = () => {
-            const body = document.body;
-            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-            const toggleButton = document.getElementById('mobile-sidebar-toggle');
-            
-            if (body.classList.contains('sidebar-visible')) {
-                body.classList.remove('sidebar-visible');
-                body.classList.add('sidebar-hidden');
-                if (toggleButton) {
-                    toggleButton.innerHTML = '☰';
-                    toggleButton.title = 'Menu';
-                }
-            } else {
-                body.classList.remove('sidebar-hidden');
-                body.classList.add('sidebar-visible');
-                if (toggleButton) {
-                    toggleButton.innerHTML = '✕';
-                    toggleButton.title = 'Close Menu';
-                }
-            }
-        };
-
-        toggleButton.onclick = function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleSidebar();
-        };
-
-        // Initialize state based on the current window size
-        const checkWindowSize = () => {
-            const body = document.body;
-            const toggleButton = document.getElementById('mobile-sidebar-toggle');
-            
-            if (window.innerWidth <= 768) {
-                // If the sidebar is expanded by default on desktop, collapse it on mobile
-                if (body.classList.contains('sidebar-visible')) {
-                    body.classList.remove('sidebar-visible');
-                    body.classList.add('sidebar-hidden');
-                    if (toggleButton) {
-                        toggleButton.innerHTML = '☰';
-                        toggleButton.title = 'Menu';
-                    }
-                }
-                if (toggleButton) {
-                    toggleButton.style.display = 'flex';
-                }
-            } else {
-                // On desktop, ensure sidebar is visible and toggle button is hidden
-                body.classList.remove('sidebar-hidden');
-                body.classList.add('sidebar-visible');
-                if (toggleButton) {
-                    toggleButton.style.display = 'none';
-                }
-            }
-        };
-
-        // Attach event listeners
-        window.addEventListener('resize', checkWindowSize);
-        checkWindowSize();
+document.addEventListener('DOMContentLoaded', function() {
+    // Create toggle button - ALWAYS VISIBLE ON MOBILE
+    const toggleButton = document.createElement('button');
+    toggleButton.innerHTML = '☰';
+    toggleButton.className = 'mobile-sidebar-toggle';
+    toggleButton.id = 'mobile-sidebar-toggle';
+    toggleButton.title = 'Menu';
+    toggleButton.setAttribute('aria-label', 'Toggle sidebar menu');
+    
+    // Initial state: sidebar hidden on mobile, visible on desktop
+    let sidebarVisible = window.innerWidth > 768;
+    
+    // Set initial classes
+    if (window.innerWidth <= 768) {
+        document.body.classList.add('sidebar-hidden');
+        toggleButton.style.display = 'flex';
+    } else {
+        document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+        toggleButton.style.display = 'none';
+    }
+    
+    toggleButton.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         
+        sidebarVisible = !sidebarVisible;
+        
+        if (sidebarVisible) {
+            document.body.classList.remove('sidebar-hidden');
+            document.body.classList.add('sidebar-visible');
+            this.innerHTML = '✕';
+            this.title = 'Close Menu';
+        } else {
+            document.body.classList.remove('sidebar-visible');
+            document.body.classList.add('sidebar-hidden');
+            this.innerHTML = '☰';
+            this.title = 'Menu';
+        }
+    };
+    
+    document.body.appendChild(toggleButton);
+    
+    // Auto-hide sidebar when clicking main content on mobile
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && sidebarVisible) {
+            const sidebar = document.querySelector('.css-1d391kg, section[data-testid="stSidebar"]');
+            const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+            
+            if (sidebar && !sidebar.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+                sidebarVisible = false;
+                document.body.classList.remove('sidebar-visible');
+                document.body.classList.add('sidebar-hidden');
+                toggleBtn.innerHTML = '☰';
+                toggleBtn.title = 'Menu';
+            }
+        }
     });
+    
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            if (window.innerWidth > 768) {
+                // Desktop
+                document.body.classList.remove('sidebar-hidden', 'sidebar-visible');
+                toggleButton.style.display = 'none';
+                sidebarVisible = true;
+            } else {
+                // Mobile
+                toggleButton.style.display = 'flex';
+                if (!sidebarVisible) {
+                    document.body.classList.add('sidebar-hidden');
+                    document.body.classList.remove('sidebar-visible');
+                    toggleButton.innerHTML = '☰';
+                } else {
+                    document.body.classList.add('sidebar-visible');
+                    document.body.classList.remove('sidebar-hidden');
+                    toggleButton.innerHTML = '✕';
+                }
+            }
+        }, 100);
+    });
+    
+    // Ad management functions
+    window.closeFloatingAd = function() {
+        const ad = document.getElementById('floating-ad');
+        if (ad) {
+            ad.style.display = 'none';
+        }
+    };
+    
+    window.showFloatingAd = function() {
+        const ad = document.getElementById('floating-ad');
+        if (ad) {
+            ad.style.display = 'flex';
+        }
+    };
+});
 </script>
 """, unsafe_allow_html=True)
 
-# Main app logic
-st.header("Multi AI Summarizer")
-st.subheader("Compare responses from multiple AI providers and get intelligent unified summaries!")
+# Initialize session state
+if "chats" not in st.session_state:
+    st.session_state["chats"] = {}
+if "active_chat" not in st.session_state:
+    st.session_state["active_chat"] = None
+if "selected_providers" not in st.session_state:
+    st.session_state["selected_providers"] = ["Gemini", "Cohere"]
+if "pending_question" not in st.session_state:
+    st.session_state["pending_question"] = None
+if "awaiting_response" not in st.session_state:
+    st.session_state["awaiting_response"] = False
+if "show_intro" not in st.session_state:
+    st.session_state["show_intro"] = True
+if "confirm_clear_all" not in st.session_state:
+    st.session_state["confirm_clear_all"] = False
+if "chat_to_delete" not in st.session_state:
+    st.session_state["chat_to_delete"] = None
 
-# Sidebar content
+# Sidebar configuration
 with st.sidebar:
-    st.image("https://placehold.co/250x100/4CAF50/FFFFFF?text=Logo+Placeholder", use_column_width=True)
-    st.write("### AI Providers")
-    providers = ["Provider A", "Provider B", "Provider C"]
-    st.session_state["selected_providers"] = st.multiselect("Select providers to use", providers, default=providers, key="providers_multiselect")
-
+    st.header("⚙️ Settings")
+    
+    providers_list = ["OpenAI", "Claude", "Gemini", "Cohere", "Perplexity"]
+    st.session_state["selected_providers"] = st.multiselect(
+        "Select AI Providers",
+        providers_list,
+        default=st.session_state["selected_providers"],
+        help="Choose which AI providers to query. More providers = more comprehensive answers!"
+    )
+    
+    st.markdown("---")
+    
+    if st.button("➕ New Chat", use_container_width=True):
+        new_id = len(st.session_state["chats"]) + 1
+        st.session_state["chats"][new_id] = {"title": "New Chat", "messages": []}
+        st.session_state["active_chat"] = new_id
+        st.session_state["pending_question"] = None
+        st.session_state["awaiting_response"] = False
+        st.session_state["show_intro"] = True
+        st.rerun()
+    
+    st.subheader("💬 Chat History")
+    
+    # Display chat history with delete buttons
+    if st.session_state["chats"]:
+        for cid, chat in st.session_state["chats"].items():
+            chat_title = chat["title"]
+            if len(chat_title) > 25:  # Truncate long titles for mobile
+                display_title = chat_title[:25] + "..."
+            else:
+                display_title = chat_title
+            
+            # Create columns for chat button and delete button
+            col1, col2 = st.columns([4, 1])
+            
+            with col1:
+                if st.button(
+                    display_title, 
+                    key=f"chat_{cid}",
+                    use_container_width=True,
+                    type="secondary" if st.session_state["active_chat"] != cid else "primary",
+                    help=chat_title if len(chat_title) > 25 else None
+                ):
+                    st.session_state["active_chat"] = cid
+                    st.session_state["pending_question"] = None
+                    st.session_state["awaiting_response"] = False
+                    st.session_state["show_intro"] = False
+                    st.session_state["chat_to_delete"] = None  # Clear any pending deletion
+                    st.rerun()
+            
+            with col2:
+                if st.button("🗑️", key=f"delete_{cid}", help=f"Delete chat: {display_title}"):
+                    st.session_state["chat_to_delete"] = cid
+                    st.rerun()
+        
+        # Handle individual chat deletion confirmation
+        if st.session_state["chat_to_delete"]:
+            chat_to_delete = st.session_state["chat_to_delete"]
+            if chat_to_delete in st.session_state["chats"]:
+                chat_title = st.session_state["chats"][chat_to_delete]["title"]
+                st.warning(f"⚠️ Delete chat: '{chat_title[:30]}...'?" if len(chat_title) > 30 else f"⚠️ Delete chat: '{chat_title}'?")
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✅ Yes, Delete", use_container_width=True, type="primary"):
+                        # Delete the specific chat
+                        del st.session_state["chats"][chat_to_delete]
+                        # If this was the active chat, clear it
+                        if st.session_state["active_chat"] == chat_to_delete:
+                            st.session_state["active_chat"] = None
+                            st.session_state["show_intro"] = True
+                        st.session_state["chat_to_delete"] = None
+                        st.session_state["pending_question"] = None
+                        st.session_state["awaiting_response"] = False
+                        st.rerun()
+                
+                with col2:
+                    if st.button("❌ Cancel", use_container_width=True, type="secondary"):
+                        st.session_state["chat_to_delete"] = None
+                        st.rerun()
+    else:
+        st.info("No chats yet. Create your first chat!")
+    
+    st.markdown("---")
+    
+    # Clear all chats functionality
+    if st.session_state["chats"]:
+        if not st.session_state["confirm_clear_all"]:
+            if st.button("🗑️ Clear All Chats", use_container_width=True, type="secondary"):
+                st.session_state["confirm_clear_all"] = True
+                st.rerun()
+        else:
+            st.warning("⚠️ This will delete ALL chats permanently!")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ Yes, Clear All", use_container_width=True, type="primary"):
+                    st.session_state["chats"] = {}
+                    st.session_state["active_chat"] = None
+                    st.session_state["pending_question"] = None
+                    st.session_state["awaiting_response"] = False
+                    st.session_state["show_intro"] = True
+                    st.session_state["confirm_clear_all"] = False
+                    st.session_state["chat_to_delete"] = None
+                    st.success("✅ All chats cleared!")
+                    time.sleep(1)  # Brief pause to show success message
+                    st.rerun()
+            
+            with col2:
+                if st.button("❌ Cancel", use_container_width=True, type="secondary"):
+                    st.session_state["confirm_clear_all"] = False
+                    st.rerun()
+    else:
+        st.info("No chats to clear")
+    
+    # Donation section with responsive design - moved to sidebar bottom
+    st.markdown("---")
+    
+    # SIDEBAR AD PLACEMENT (Subtle)
     st.markdown("""
     <div class="ad-sidebar">
-        <small>Ad Placeholder</small>
+        <small style="color: #777;">Ad</small>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("### 💝 Support Us")
+    st.markdown("""
+    <div style="text-align:center; margin-top:10px;">
+        <a href="https://paypal.me/multiaisummarizer"
+           target="_blank"
+           style="text-decoration:none; color:#fff; background-color:#ff6600;
+                  padding:6px 12px; border-radius:6px; font-weight:bold; 
+                  display:inline-block; font-size:12px;">
+            ❤️ Support Us
+        </a>
+    </div>
+    <p style="font-size:10px; text-align:center; margin-top:6px; color:gray;">
+        Free project using free models.<br>
+        Donate to enable premium AI!
+    </p>
+    """, unsafe_allow_html=True)
+
+# Main content area
+st.title("🤖 Multi AI Summarizer")
+st.markdown("*Compare and combine responses from multiple AI providers for comprehensive insights*")
+
+# TOP BANNER AD PLACEMENT (Subtle)
+st.markdown("""
+<div class="ad-banner">
+    <small style="color: #bbb;">Advertisement space</small>
+</div>
+""", unsafe_allow_html=True)
+
+def infer_title(messages):
+    for msg in messages:
+        if msg["role"] == "user" and msg["content"].strip():
+            title = msg["content"][:50] + "..." if len(msg["content"]) > 50 else msg["content"]
+            return title
+    return "New Chat"
+
+# Educational content for new users
+if st.session_state["active_chat"] is None or (st.session_state["show_intro"] and not st.session_state["chats"].get(st.session_state["active_chat"], {}).get("messages")):
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("### 🎯 How It Works")
+        st.markdown("""
+        1. **Select Providers** - Choose AI models from sidebar
+        2. **Ask Questions** - Type your question below
+        3. **Get Smart Summary** - AI combines all responses
+        4. **Compare Details** - View individual responses
+        """)
+        
+        if not st.session_state["selected_providers"]:
+            st.warning("⚠️ Select AI providers from sidebar to start")
+        else:
+            st.success(f"✅ Ready! Using: {', '.join(st.session_state['selected_providers'])}")
+    
+    with col2:
+        st.markdown("### 💡 Quick Tips")
+        st.info("**More providers = better insights**\nDifferent AIs excel at different tasks")
+        st.success("**Perfect for:** Research, creative writing, technical questions, decision making")
+    
+    if st.session_state["active_chat"] is None:
+        st.info("👆 Click the '☰' button on mobile or 'New Chat' to get started!")
+
+# AD BETWEEN INTRO AND CHAT (Subtle)
+if st.session_state["active_chat"] is None or (st.session_state["show_intro"] and not st.session_state["chats"].get(st.session_state["active_chat"], {}).get("messages")):
+    st.markdown("""
+    <div class="ad-between-chats">
+        <small>Sponsored content</small>
     </div>
     """, unsafe_allow_html=True)
 
-# Placeholder for main content - will be replaced with chat
-if "chat" not in st.session_state:
-    st.session_state["chat"] = {"title": "New Chat", "messages": []}
-if "show_intro" not in st.session_state:
-    st.session_state["show_intro"] = True
-if "awaiting_response" not in st.session_state:
-    st.session_state["awaiting_response"] = False
-if "pending_question" not in st.session_state:
-    st.session_state["pending_question"] = ""
+# Chat interface
+if st.session_state["active_chat"] is not None:
+    chat = st.session_state["chats"][st.session_state["active_chat"]]
+    chat["title"] = infer_title(chat["messages"])
+    
+    # Chat messages display
+    chat_container = st.container()
+    
+    with chat_container:
+        for idx, msg in enumerate(chat["messages"]):
+            if msg["role"] == "user":
+                st.markdown(f"""
+                <div class="user-message">
+                    <strong>🙋 You:</strong> {msg['content']}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Handle pending response
+                if (st.session_state["awaiting_response"] and 
+                    st.session_state["pending_question"] == msg["content"] and 
+                    idx == len(chat["messages"]) - 1):
+                    
+                    with st.spinner(f"🔍 Querying {len(st.session_state['selected_providers'])} AI providers..."):
+                        history = chat["messages"][:-1] if len(chat["messages"]) > 1 else []
+                        
+                        try:
+                            start_time = time.time()
+                            response = requests.post(
+                                f"{API_URL}/ask",
+                                json={
+                                    "query": msg["content"],
+                                    "providers": st.session_state["selected_providers"],
+                                    "history": history
+                                },
+                                timeout=60
+                            )
+                            response_time = round(time.time() - start_time, 1)
+                            
+                            if response.status_code == 200:
+                                data = response.json()
+                                chat["messages"].append({
+                                    "role": "assistant",
+                                    "content": data["summary"],
+                                    "providers": data["responses"],
+                                    "response_time": response_time
+                                })
+                                st.success("✅ Response received!")
+                            else:
+                                error_msg = f"⚠️ Backend error: {response.status_code}"
+                                chat["messages"].append({
+                                    "role": "assistant", 
+                                    "content": error_msg, 
+                                    "providers": {}
+                                })
+                                
+                        except requests.exceptions.Timeout:
+                            error_msg = "⚠️ Request timed out. Please try again."
+                            chat["messages"].append({
+                                "role": "assistant", 
+                                "content": error_msg, 
+                                "providers": {}
+                            })
+                        except Exception as e:
+                            error_msg = f"⚠️ Connection error: Please check if the backend is running."
+                            chat["messages"].append({
+                                "role": "assistant", 
+                                "content": error_msg, 
+                                "providers": {}
+                            })
+                        
+                        st.session_state["pending_question"] = None
+                        st.session_state["awaiting_response"] = False
+                        st.rerun()
+            
+            elif msg["role"] == "assistant":
+                # AI response header
+                response_time_info = f" • {msg.get('response_time', 'N/A')}s" if msg.get('response_time') else ""
+                st.markdown(f"""
+                <div class="ai-summary">
+                    <strong>🤖 AI Summary</strong>{response_time_info}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # AI response content
+                st.markdown(f"""
+                <div class="ai-content">
+                    {msg['content']}
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Provider details
+                providers_data = msg.get("providers", {})
+                if providers_data:
+                    with st.expander("🔍 **Provider Details** - Compare individual responses", expanded=False):
+                        successful_providers = []
+                        failed_providers = []
+                        
+                        for provider, response in providers_data.items():
+                            if response.startswith("⚠️"):
+                                failed_providers.append((provider, response))
+                            else:
+                                successful_providers.append((provider, response))
+                        
+                        # Successful responses
+                        if successful_providers:
+                            st.markdown("#### ✅ **Successful Responses:**")
+                            for provider, response in successful_providers:
+                                st.markdown(f"**🔹 {provider}:**")
+                                st.success(response)
+                        
+                        # Failed responses
+                        if failed_providers:
+                            st.markdown("#### ❌ **Failed Responses:**")
+                            for provider, response in failed_providers:
+                                st.error(f"**{provider}:** {response}")
+                        
+                        # Summary statistics
+                        total = len(providers_data)
+                        successful = len(successful_providers)
+                        st.info(f"📊 **Response Summary:** {successful}/{total} providers successful")
 
-def infer_title(messages):
-    if messages:
-        first_message = messages[0]["content"]
-        response = requests.post(f"{API_URL}/infer_title", json={"text": first_message})
-        if response.status_code == 200:
-            return response.json().get("title", "New Chat")
-    return "New Chat"
-
-if st.session_state["show_intro"]:
-    with st.container(border=True):
-        st.markdown("""
-        <div class="intro-section">
-            <h3>Welcome to Multi AI Summarizer! ✨</h3>
-            <p><strong>Powered by multiple state-of-the-art AI models.</strong></p>
-            <ul>
-                <li><strong>Compare:</strong> Get different summaries and insights from various AI providers simultaneously.</li>
-                <li><strong>Unify:</strong> Receive a single, intelligent summary that combines the best of all worlds.</li>
-                <li><strong>Customize:</strong> Select the AI models you want to use in the sidebar.</li>
-            </ul>
-            <p>Start by asking a question or providing text below. For example, "Summarize the key findings from the latest climate report," or "What are the pros and cons of renewable energy?"</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-for message in st.session_state["chat"]["messages"]:
-    if message["role"] == "user":
-        st.markdown(f'<div class="user-message">🗣️ {message["content"]}</div>', unsafe_allow_html=True)
-    elif message["role"] == "assistant":
-        st.markdown(f'<div class="ai-summary">🧠 <strong>Summary:</strong><br>{message["content"]["summary"]}</div>', unsafe_allow_html=True)
-        with st.expander("Show Detailed Responses"):
-            for provider, content in message["content"]["details"].items():
-                st.markdown(f"**{provider}:**")
-                st.markdown(f'<div class="ai-content">{content}</div>', unsafe_allow_html=True)
-        if message["content"]["status_code"] != 200:
-            st.markdown(f'<div class="status-error">⚠️ Error fetching from some providers: {message["content"]["status_message"]}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="status-success">✅ Responses from all providers successfully received.</div>', unsafe_allow_html=True)
-
-user_input = st.chat_input("Enter your text or question here...")
-
-if st.session_state["awaiting_response"]:
-    with st.spinner("Thinking..."):
-        time.sleep(2) # Simulate API call delay for now
+# Chat input - always at bottom
+if st.session_state["active_chat"] is not None:
+    # Input validation and UX
+    input_disabled = (not st.session_state["selected_providers"] or 
+                     st.session_state["awaiting_response"])
+    
+    placeholder_text = ("Ask your question..." if st.session_state["selected_providers"] 
+                       else "Select AI providers first")
+    
+    user_input = st.chat_input(
+        placeholder_text,
+        disabled=input_disabled
+    )
+    
+    # Handle new user input
+    if user_input and not st.session_state["awaiting_response"] and st.session_state["selected_providers"]:
+        st.session_state["pending_question"] = user_input
+        st.session_state["awaiting_response"] = True
+        st.session_state["show_intro"] = False
         
-        # This part of the code would normally make an actual API call
-        try:
-            response = requests.post(f"{API_URL}/summarize", json={"text": st.session_state["pending_question"], "providers": st.session_state["selected_providers"]})
-            response.raise_for_status()
-            
-            response_data = response.json()
-            st.session_state["chat"]["messages"].append({
-                "role": "assistant",
-                "content": response_data
-            })
-            st.session_state["awaiting_response"] = False
-            st.session_state["pending_question"] = ""
-            st.rerun()
-            
-        except requests.exceptions.RequestException as e:
-            st.error(f"An error occurred: {e}. Please check if your backend API is running.")
-            st.session_state["awaiting_response"] = False
-            st.session_state["pending_question"] = ""
-            st.rerun()
-
-# This is the new user input handler
-if user_input and not st.session_state["awaiting_response"] and st.session_state["selected_providers"]:
-    st.session_state["pending_question"] = user_input
-    st.session_state["awaiting_response"] = True
-    st.session_state["show_intro"] = False
-    
-    st.session_state["chat"]["messages"].append({"role": "user", "content": user_input})
-    if len(st.session_state["chat"]["messages"]) == 1:
-        st.session_state["chat"]["title"] = infer_title(st.session_state["chat"]["messages"])
-    
-    st.rerun()
+        chat["messages"].append({"role": "user", "content": user_input})
+        if len(chat["messages"]) == 1:
+            chat["title"] = infer_title(chat["messages"])
+        
+        st.rerun()
 
 # Footer - much more subtle now
 st.markdown("---")
@@ -866,21 +1159,17 @@ st.markdown("""
 # FLOATING AD (Subtle - appears after 15 seconds)
 st.markdown("""
 <div id="floating-ad" class="ad-floating" style="display: none;">
-    <button class="ad-close" onclick="closeFloatingAd()">✕</button>
-    <small style="color: #888;">Advertisement</small>
+    <button class="ad-close" onclick="closeFloatingAd()">×</button>
+    <div>
+        <small style="color: #888;">Premium features coming soon</small>
+    </div>
 </div>
 
 <script>
-    function closeFloatingAd() {
-        document.getElementById('floating-ad').style.display = 'none';
+setTimeout(function() {
+    if (typeof showFloatingAd === 'function') {
+        showFloatingAd();
     }
-
-    // Show floating ad after 15 seconds, if not already closed
-    setTimeout(function() {
-        const ad = document.getElementById('floating-ad');
-        if (ad && ad.style.display !== 'none') {
-            ad.style.display = 'flex';
-        }
-    }, 15000);
+}, 15000); // Show after 15 seconds
 </script>
 """, unsafe_allow_html=True)
