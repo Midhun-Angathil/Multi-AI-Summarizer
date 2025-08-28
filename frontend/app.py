@@ -493,7 +493,7 @@ if st.session_state["active_chat"] is None or (st.session_state["show_intro"] an
     """, unsafe_allow_html=True)
     
     if st.session_state["active_chat"] is None:
-        st.info("👈 click 'New Chat' to get started! Mobile users: Open the left sidebar if visible (else, hold the phone in landscape mode)")
+        st.info("👈 Click 'New Chat' to get started! Mobile users: Open the left sidebar if visible (else, hold the phone in landscape mode)")
 
 # Chat interface
 if st.session_state["active_chat"] is not None:
