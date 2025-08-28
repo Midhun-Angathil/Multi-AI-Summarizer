@@ -17,10 +17,10 @@ st.set_page_config(
 # Add Google AdSense script to head
 st.markdown("""
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1587919634342405"
-     crossorigin="anonymous"></script>
+      crossorigin="anonymous"></script>
 """, unsafe_allow_html=True)
 
-# Simplified mobile-first CSS approach
+# Simplified mobile-first CSS approach with a new section for the floating ad
 st.markdown("""
 <style>
     /* Mobile-first approach - simpler and more reliable */
@@ -284,6 +284,65 @@ st.markdown("""
             margin-bottom: 1rem !important;
         }
     }
+    
+    /* Floating Ad */
+    .ad-floating {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: #ff6600;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        animation: fadeIn 0.5s ease-out;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .ad-floating:hover {
+        background: #e65c00;
+    }
+
+    .ad-floating .arrow {
+        font-size: 24px;
+        animation: bounce 1s infinite;
+        transform: rotate(25deg);
+        line-height: 1;
+    }
+    
+    .ad-floating .ad-close {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #ff6600;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0) rotate(25deg); }
+        50% { transform: translateY(-5px) rotate(25deg); }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -304,6 +363,9 @@ if "confirm_clear_all" not in st.session_state:
     st.session_state["confirm_clear_all"] = False
 if "chat_to_delete" not in st.session_state:
     st.session_state["chat_to_delete"] = None
+# New session state variables for the floating ad
+if "floating_ad_shown" not in st.session_state:
+    st.session_state["floating_ad_shown"] = False
 
 # Sidebar configuration - using Streamlit's native mobile behavior
 with st.sidebar:
@@ -360,7 +422,7 @@ with st.sidebar:
                 if st.button("🗑️", key=f"delete_{cid}", help=f"Delete chat: {display_title}"):
                     st.session_state["chat_to_delete"] = cid
                     st.rerun()
-        
+    
         # Handle individual chat deletion confirmation
         if st.session_state["chat_to_delete"]:
             chat_to_delete = st.session_state["chat_to_delete"]
@@ -431,10 +493,10 @@ with st.sidebar:
     st.markdown("""
     <div style="text-align:center; margin-top:10px;">
         <a href="https://paypal.me/multiaisummarizer"
-           target="_blank"
-           style="text-decoration:none; color:#fff; background-color:#ff6600;
-                  padding:8px 12px; border-radius:6px; font-weight:bold; 
-                  display:inline-block; font-size:12px;">
+            target="_blank"
+            style="text-decoration:none; color:#fff; background-color:#ff6600;
+                   padding:8px 12px; border-radius:6px; font-weight:bold; 
+                   display:inline-block; font-size:12px;">
             ❤️ Support Us
         </a>
     </div>
@@ -620,7 +682,7 @@ if st.session_state["active_chat"] is not None:
                      st.session_state["awaiting_response"])
     
     placeholder_text = ("Ask your question..." if st.session_state["selected_providers"] 
-                       else "Select AI providers first")
+                        else "Select AI providers first")
     
     user_input = st.chat_input(
         placeholder_text,
@@ -638,6 +700,35 @@ if st.session_state["active_chat"] is not None:
             chat["title"] = infer_title(chat["messages"])
         
         st.rerun()
+
+# Logic to show the floating ad after a few messages
+if st.session_state["active_chat"] is not None:
+    if len(st.session_state["chats"][st.session_state["active_chat"]]["messages"]) >= 2 and not st.session_state["floating_ad_shown"]:
+        st.markdown("""
+        <div id="floating-ad" class="ad-floating">
+            <span class="arrow">➡️</span>
+            <span>Enjoying this? Support us!</span>
+        </div>
+        <script>
+            // Simple JS to hide the ad on click
+            const ad = document.getElementById('floating-ad');
+            if (ad) {
+                ad.onclick = function() {
+                    // Navigate to the sidebar link
+                    const sidebarLink = window.parent.document.querySelector('.sidebar a[href*="paypal"]');
+                    if (sidebarLink) {
+                        sidebarLink.click();
+                    }
+                    ad.style.display = 'none';
+                    // Inform streamlit that the ad has been clicked/closed
+                    // This is for demonstration, actual state management needs backend
+                    // and would be more complex
+                };
+            }
+        </script>
+        """, unsafe_allow_html=True)
+        # Set session state to true so it only shows once per session
+        st.session_state["floating_ad_shown"] = True
 
 # Footer
 st.markdown("---")
